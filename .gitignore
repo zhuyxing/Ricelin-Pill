@@ -9,3 +9,6 @@ Thumbs.db
 
 # Per-machine
 .envrc
+
+# Personal notes / transcripts / planning — local only
+memory/
