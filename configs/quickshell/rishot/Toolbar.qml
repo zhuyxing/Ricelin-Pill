@@ -14,13 +14,15 @@ Item {
     property bool canRedo: false
     property string savePath: ""
     property bool saving: false       // inline path field revealed
+    property bool settingsOpen: false // gear-expanded settings panel revealed
+    property string luaPath: ""       // abs path to rishot.lua (passed to the panel)
 
     signal toolPicked(string tool)
     signal undoRequested()
     signal redoRequested()
     signal copyRequested()
     signal saveRequested(string path)
-    signal settingsRequested()        // gear hook (inert in 2a)
+    signal settingsRequested()        // gear hook
 
     readonly property color glassBg: Qt.rgba(20 / 255, 24 / 255, 34 / 255, 0.92)
     readonly property color glassBorder: "#313a4d"
@@ -103,8 +105,31 @@ Item {
 
             Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 20; color: tb.sep; Layout.leftMargin: 3; Layout.rightMargin: 3 }
 
-            // Gear, far right. Inert in 2a — Phase 2b wires settingsRequested().
-            IconButton { label: "⚙"; dim: true; onClicked: tb.settingsRequested() }
+            // Gear, far right. Toggles the inline settings panel (expands toolbar to the right).
+            IconButton {
+                label: "⚙"
+                active: tb.settingsOpen
+                onClicked: { tb.settingsOpen = !tb.settingsOpen; tb.settingsRequested(); }
+            }
+
+            // Inline settings panel — width animates open/closed for a subtle expansion.
+            Item {
+                id: settingsWrap
+                Layout.preferredHeight: 28
+                Layout.preferredWidth: tb.settingsOpen ? settings.implicitWidth : 0
+                clip: true
+                Behavior on Layout.preferredWidth {
+                    NumberAnimation { duration: 160; easing.type: Easing.OutCubic }
+                }
+
+                SettingsPanel {
+                    id: settings
+                    anchors.verticalCenter: parent.verticalCenter
+                    height: 28
+                    luaPath: tb.luaPath
+                    visible: tb.settingsOpen || settingsWrap.width > 0
+                }
+            }
         }
     }
 

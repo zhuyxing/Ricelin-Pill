@@ -31,6 +31,7 @@ ShellRoot {
     readonly property bool testRect: Quickshell.env("RISHOT_TESTRECT") === "1"
     readonly property string homeDir: Quickshell.env("HOME")
     readonly property string shotsDir: homeDir + "/Pictures/Screenshots"
+    readonly property string rishotLuaPath: homeDir + "/.config/hypr/modules/rishot.lua"
 
     readonly property color vermilion: "#e0563b"
 
@@ -240,6 +241,7 @@ ShellRoot {
                     canUndo: root.model ? root.model.canUndo() : false
                     canRedo: root.model ? root.model.canRedo() : false
                     savePath: root.defaultPath
+                    luaPath: root.rishotLuaPath
 
                     // place centered under the selection, clamped to the screen
                     x: {
@@ -259,7 +261,7 @@ ShellRoot {
                     onRedoRequested: root.redo()
                     onCopyRequested: root.doCopy()
                     onSaveRequested: (p) => root.doSave(p)
-                    onSettingsRequested: console.log("rishot: settings (inert in 2a — Phase 2b)")
+                    onSettingsRequested: console.log("rishot: settings panel toggled")
                 }
             }
 
