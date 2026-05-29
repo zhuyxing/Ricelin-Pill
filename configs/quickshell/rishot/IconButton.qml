@@ -1,11 +1,10 @@
-// rishot — single toolbar button. Vermilion fill + white glyph when active; dim glyph when inert.
 import QtQuick
 
 Rectangle {
     id: btn
     property string label: ""
     property bool active: false
-    property bool dim: false       // inert / disabled look
+    property bool dim: false
 
     signal clicked()
 

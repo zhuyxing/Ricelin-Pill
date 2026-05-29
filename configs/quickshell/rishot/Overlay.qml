@@ -1,9 +1,3 @@
-// rishot — per-screen overlay: frozen capture bg + annotation canvas (the "scene"), with dim,
-// selection chrome and toolbar layered ABOVE as separate siblings so they never enter the export.
-// Export-clip: a ShaderEffectSource mirrors the scene's rendered texture (no re-capture, so the
-// frozen frame is reused without polluting it), cropped+offset to the local selection rect, then
-// grabToImage'd. Capture freezes one frame (captureFrame until hasContent, then stop); dim/chrome
-// only paint after the frame is frozen so wlr-screencopy never grabs our own surface.
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
@@ -13,14 +7,14 @@ Item {
     id: overlay
     anchors.fill: parent
 
-    required property var screenData          // ShellScreen for this output
-    property var globalSel: null              // shared global selection {x,y,w,h} | null
-    property bool capturing: false            // true while drag in progress
-    property bool ready: false                // frozen frame captured
+    required property var screenData
+    property var globalSel: null
+    property bool capturing: false
+    property bool ready: false
 
-    property var model: null                  // shared AnnotationModel instance
-    property var draft: null                  // in-progress annotation | null
-    property int annRevision: 0               // bump to refresh annotation render
+    property var model: null
+    property var draft: null
+    property int annRevision: 0
 
     signal pressedAt(real gx, real gy)
     signal movedTo(real gx, real gy)
@@ -30,7 +24,6 @@ Item {
     readonly property int sx: screenData.x
     readonly property int sy: screenData.y
 
-    // local sub-rect of the global selection that lands on this output, or null
     readonly property var localSel: globalSel
         ? Coords.intersectRect(globalSel, { x: sx, y: sy, width: width, height: height })
         : null
@@ -38,7 +31,6 @@ Item {
     readonly property color dimColor: Qt.rgba(8 / 255, 10 / 255, 16 / 255, 0.62)
     readonly property color vermilion: "#e0563b"
 
-    // ---- scene: frozen frame + annotation canvas (the only thing exported) ----
     Item {
         id: scene
         anchors.fill: parent
@@ -62,7 +54,6 @@ Item {
         }
     }
 
-    // Drive a single frozen capture: call captureFrame() until content arrives, then STOP.
     Timer {
         id: capTimer
         interval: 50
@@ -76,42 +67,41 @@ Item {
                 overlay.ready = true;
                 overlay.frozen();
             } else if (tries > 60) {
-                running = false;          // give up; surface stays transparent
+                running = false;
             } else {
                 frozen.captureFrame();
             }
         }
     }
 
-    // ---- chrome (NOT exported): dim, selection border, handles, label ----
-    Rectangle {            // full dim when no selection on this output
+    Rectangle {
         anchors.fill: parent
         color: overlay.dimColor
         visible: overlay.ready && overlay.localSel === null
     }
 
-    Item {                 // four-band dim around the selection
+    Item {
         anchors.fill: parent
         visible: overlay.ready && overlay.localSel !== null
-        Rectangle {        // top
+        Rectangle {
             color: overlay.dimColor
             x: 0; y: 0; width: parent.width
             height: overlay.localSel ? overlay.localSel.y : 0
         }
-        Rectangle {        // bottom
+        Rectangle {
             color: overlay.dimColor
             x: 0; width: parent.width
             y: overlay.localSel ? overlay.localSel.y + overlay.localSel.h : 0
             height: overlay.localSel ? parent.height - (overlay.localSel.y + overlay.localSel.h) : 0
         }
-        Rectangle {        // left
+        Rectangle {
             color: overlay.dimColor
             x: 0
             y: overlay.localSel ? overlay.localSel.y : 0
             width: overlay.localSel ? overlay.localSel.x : 0
             height: overlay.localSel ? overlay.localSel.h : 0
         }
-        Rectangle {        // right
+        Rectangle {
             color: overlay.dimColor
             x: overlay.localSel ? overlay.localSel.x + overlay.localSel.w : 0
             y: overlay.localSel ? overlay.localSel.y : 0
@@ -120,7 +110,6 @@ Item {
         }
     }
 
-    // Selection chrome: vermilion border + corner handles + dimensions label.
     Item {
         id: chrome
         visible: overlay.ready && overlay.localSel !== null
@@ -164,8 +153,6 @@ Item {
         }
     }
 
-    // ---- export-clip: mirrors the scene texture, cropped to the local selection ----
-    // Hidden from view (placed off-window); used only as a grabToImage target.
     Item {
         id: exportClip
         clip: true
@@ -175,7 +162,6 @@ Item {
 
         ShaderEffectSource {
             sourceItem: scene
-            // Show the whole scene texture, shifted so the selection origin lands at 0,0.
             width: scene.width
             height: scene.height
             x: overlay.localSel ? -overlay.localSel.x : 0
@@ -185,7 +171,6 @@ Item {
         }
     }
 
-    // Grab ONLY the selection region (frozen pixels + annotations, no dim/chrome). cb(ok).
     function grabExport(path, cb) {
         if (!overlay.localSel) { cb(false); return; }
         var scheduled = exportClip.grabToImage(function (result) {

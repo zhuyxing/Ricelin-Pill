@@ -1,19 +1,14 @@
-// rishot — annotation layer for one output (file is AnnLayer to avoid clashing with QtQuick's
-// built-in `Canvas` type; the spec calls this unit "Canvas"). Renders committed annotations
-// (model.items) plus the in-progress draft on top of the frozen capture, in this screen's LOCAL
-// coords. Real QML items (Rectangle for rect); export grabs this together with the frozen frame.
 import QtQuick
 
 Item {
     id: canvas
 
-    required property int sx        // this screen's global x origin
-    required property int sy        // this screen's global y origin
-    property var model: null        // AnnotationModel instance ({items,...})
-    property var draft: null        // in-progress annotation (same shape as a model item) | null
-    property int revision: 0        // bump to force a re-read of model.items
+    required property int sx
+    required property int sy
+    property var model: null
+    property var draft: null
+    property int revision: 0
 
-    // Flatten committed items + draft into a render list of LOCAL rects for rect-type annotations.
     function rects() {
         var out = [];
         var src = model ? model.items.slice() : [];

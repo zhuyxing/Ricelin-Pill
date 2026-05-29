@@ -1,7 +1,3 @@
-// rishot — Vermilion glass toolbar shown under the selection. Tool row (Rect implemented,
-// rest inert placeholders flagged `implemented:false`), undo/redo, copy, save (native dialog),
-// and a far-right gear that toggles a floating hotkey popover (rendered by shell.qml above the
-// gear — the toolbar itself never widens). Emits intent signals only.
 import QtQuick
 import QtQuick.Layouts
 
@@ -13,17 +9,16 @@ Item {
     property string activeTool: "rect"
     property bool canUndo: false
     property bool canRedo: false
-    property bool settingsOpen: false // floating hotkey popover revealed (placed by shell.qml)
+    property bool settingsOpen: false
 
-    // gear center in tb-local coords, so shell.qml can anchor the popover above it
     readonly property real gearCenterX: gear.x + row.x + gear.width / 2
 
     signal toolPicked(string tool)
     signal undoRequested()
     signal redoRequested()
     signal copyRequested()
-    signal saveRequested()            // -> shell.qml opens a native save dialog
-    signal settingsRequested()        // gear toggle hook
+    signal saveRequested()
+    signal settingsRequested()
 
     readonly property color glassBg: Qt.rgba(20 / 255, 24 / 255, 34 / 255, 0.92)
     readonly property color glassBorder: "#313a4d"
@@ -31,7 +26,6 @@ Item {
     readonly property color idle: "#c4ccda"
     readonly property color sep: "#313a4d"
 
-    // Tool set: only `rect` is wired in 2a; the rest render but are inert (Phase 3).
     readonly property var tools: [
         { id: "rect",    glyph: "▭", implemented: true },
         { id: "ellipse", glyph: "◯", implemented: false },
@@ -81,7 +75,6 @@ Item {
 
             Rectangle { Layout.preferredWidth: 1; Layout.preferredHeight: 20; color: tb.sep; Layout.leftMargin: 3; Layout.rightMargin: 3 }
 
-            // Gear, far right. Toggles the floating hotkey popover (placed above by shell.qml).
             IconButton {
                 id: gear
                 label: "⚙"

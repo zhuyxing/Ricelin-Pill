@@ -1,6 +1,3 @@
-// rishot — minimal hotkey popover floated above the toolbar gear. Content is only the current
-// hotkey + a Record button. Record -> listens for the next key chord -> maps to a Hyprland keyname
-// (lib/keymap.js) -> rewrites rishot.lua -> hyprctl reload -> updates the label live. Vermilion glass.
 import QtQuick
 import QtQuick.Layouts
 import Quickshell.Io
@@ -8,12 +5,12 @@ import "lib/keymap.js" as Keymap
 
 Item {
     id: panel
-    property string luaPath: ""          // absolute path to rishot.lua
-    property string hotkey: "—"          // current bind string, parsed from the file
-    property bool listening: false       // true while waiting for a key chord
+    property string luaPath: ""
+    property string hotkey: "—"
+    property bool listening: false
 
-    signal closeRequested()              // Esc while not listening -> close popover
-    signal rebound()                     // hotkey rewritten + reloaded -> close rishot so the new key is usable now
+    signal closeRequested()
+    signal rebound()
 
     readonly property color glassBg: Qt.rgba(24 / 255, 28 / 255, 38 / 255, 0.97)
     readonly property color glassBorder: "#3a4456"
@@ -24,14 +21,12 @@ Item {
     implicitWidth: card.implicitWidth
     implicitHeight: card.implicitHeight + arrow
 
-    // ---- read current hotkey on load ----
     FileView {
         id: reader
         path: panel.luaPath
         onLoaded: { var b = Keymap.parseBind(text()); if (b) panel.hotkey = b; }
     }
 
-    // ---- write rewritten file, then reload Hyprland on success ----
     FileView {
         id: writer
         path: panel.luaPath
@@ -46,7 +41,6 @@ Item {
         onExited: (code) => { console.log("rishot: hyprctl reload exit " + code); panel.rebound(); }
     }
 
-    // Commit a captured chord: update label, rewrite file, reload.
     function applyBind(bind) {
         panel.hotkey = bind;
         panel.listening = false;
@@ -107,7 +101,6 @@ Item {
         }
     }
 
-    // Subtle downward arrow pointing at the gear.
     Canvas {
         width: panel.arrow * 2
         height: panel.arrow
@@ -126,7 +119,6 @@ Item {
         }
     }
 
-    // Focused key sink, active only while open. Captures the next complete chord; Esc closes.
     Item {
         id: keyCatcher
         focus: panel.visible
@@ -139,7 +131,7 @@ Item {
             }
             if (!panel.listening) return;
             var bind = Keymap.bindString(e.key, e.modifiers, e.text);
-            if (bind !== null) panel.applyBind(bind);   // else: bare modifier, keep listening
+            if (bind !== null) panel.applyBind(bind);
         }
     }
 }

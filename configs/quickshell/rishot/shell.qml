@@ -1,9 +1,3 @@
-// rishot — entry / coordinator. One keyboard-exclusive overlay window per screen over a frozen
-// capture. Flow: drag region (phase "selecting") -> release locks it (phase "editing") -> toolbar
-// appears under the selection on its monitor -> draw Rect annotations inside the selection ->
-// Copy / Save / Esc. Auto-save always fires on any export action. Selection + annotations live in
-// GLOBAL coords; each overlay renders the intersecting sub-rect.
-// Pollution rule (Spike 0): each screen captures its frozen frame, then dim/chrome paint after.
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -14,17 +8,16 @@ import "lib/AnnotationModel.js" as Ann
 ShellRoot {
     id: root
 
-    // ---- shared state (global coordinate space) ----
-    property var globalSel: null      // {x,y,w,h} | null
-    property var pressPoint: null     // {x,y} | null
+    property var globalSel: null
+    property var pressPoint: null
     property bool capturing: false
-    property string phase: "selecting"   // "selecting" | "editing"
+    property string phase: "selecting"
     property string activeTool: "rect"
 
     property var model: Ann.create()
-    property var draft: null           // in-progress annotation | null
+    property var draft: null
     property int annRevision: 0
-    property bool settingsOpen: false  // hotkey popover visibility (single, on the anchor overlay)
+    property bool settingsOpen: false
 
     property var overlays: []
     property int frozenCount: 0
@@ -36,7 +29,6 @@ ShellRoot {
 
     readonly property color vermilion: "#e0563b"
 
-    // ---- region selection (phase: selecting) ----
     function beginSelection(gx, gy) {
         pressPoint = { x: gx, y: gy };
         capturing = true;
@@ -53,7 +45,6 @@ ShellRoot {
         else globalSel = null;
     }
 
-    // ---- annotation drawing (phase: editing) ----
     function clampToSel(gx, gy) {
         var x = Math.max(globalSel.x, Math.min(gx, globalSel.x + globalSel.w));
         var y = Math.max(globalSel.y, Math.min(gy, globalSel.y + globalSel.h));
@@ -84,7 +75,6 @@ ShellRoot {
     function undo() { if (model.undo()) bumpAnn(); }
     function redo() { if (model.redo()) bumpAnn(); }
 
-    // ---- pointer routing by phase ----
     function pointerPressed(gx, gy) {
         if (phase === "selecting") beginSelection(gx, gy);
         else beginDraw(gx, gy);
@@ -98,7 +88,6 @@ ShellRoot {
         else endDraw();
     }
 
-    // ---- export ----
     function timestampName() {
         var d = new Date();
         function p(n) { return (n < 10 ? "0" : "") + n; }
@@ -107,7 +96,6 @@ ShellRoot {
     }
     readonly property string defaultPath: shotsDir + "/" + timestampName()
 
-    // The overlay whose monitor contains the selection anchor (top-left). Single-monitor case.
     function anchorOverlay() {
         if (!globalSel) return null;
         for (var i = 0; i < overlays.length; i++) {
@@ -129,7 +117,6 @@ ShellRoot {
         return hit > 1;
     }
 
-    // Grab the selection to `path`. Then run `after(ok)` (e.g. copy/quit). Auto-save handled by caller.
     function grabTo(path, after) {
         var w = anchorOverlay();
         if (!w) { if (after) after(false); return; }
@@ -141,7 +128,6 @@ ShellRoot {
         });
     }
 
-    // Copy action: auto-save, then wl-copy the PNG, then quit.
     function doCopy() {
         var auto = defaultPath;
         grabTo(auto, function (ok) {
@@ -150,8 +136,6 @@ ShellRoot {
         });
     }
 
-    // Save action: open a native save dialog (kdialog). On accept -> auto-save to default + write
-    // the chosen path + quit. On cancel -> keep rishot open (no auto-save, no quit).
     function doSave() { saveDialog.open(); }
 
     function commitSave(chosen) {
@@ -162,7 +146,6 @@ ShellRoot {
         });
     }
 
-    // Native save dialog. kdialog prints the chosen path to stdout + exits 0; cancel = non-zero/empty.
     Process {
         id: saveDialog
         stdout: StdioCollector { id: saveOut }
@@ -191,9 +174,7 @@ ShellRoot {
         if (testRect && frozenCount >= Quickshell.screens.length) testDriver.start();
     }
 
-    // ---- toolbar placement: below the selection, clamped, on the selection's monitor ----
     function toolbarFor(win) {
-        // returns {visible, x, y} in this win's LOCAL coords, or {visible:false}
         if (phase !== "editing" || !globalSel) return { visible: false, x: 0, y: 0 };
         if (anchorOverlay() !== win) return { visible: false, x: 0, y: 0 };
         return { visible: true };
@@ -217,7 +198,6 @@ ShellRoot {
             readonly property string scrName: win.modelData.name
             readonly property bool showToolbar: root.toolbarFor(win).visible
 
-            // toolbar position in local coords (below selection, clamped on-screen)
             readonly property var selLocal: root.globalSel
                 ? Coords.intersectRect(root.globalSel,
                     { x: win.modelData.x, y: win.modelData.y, width: win.width, height: win.height })
@@ -227,7 +207,6 @@ ShellRoot {
                 anchors.fill: parent
                 focus: true
 
-                // Esc closes the hotkey popover if open; otherwise cancels rishot.
                 Keys.onEscapePressed: { if (root.settingsOpen) root.settingsOpen = false; else Qt.quit(); }
                 Keys.onPressed: (e) => {
                     if (e.key === Qt.Key_C && (e.modifiers & Qt.ControlModifier)) { root.doCopy(); e.accepted = true; }
@@ -259,7 +238,6 @@ ShellRoot {
                     canRedo: root.model ? root.model.canRedo() : false
                     settingsOpen: root.settingsOpen
 
-                    // place centered under the selection, clamped to the screen
                     x: {
                         if (!win.selLocal) return 0;
                         var cx = win.selLocal.x + win.selLocal.w / 2 - width / 2;
@@ -280,7 +258,6 @@ ShellRoot {
                     onSettingsRequested: root.settingsOpen = toolbar.settingsOpen
                 }
 
-                // Hotkey popover, floated just ABOVE the gear (toolbar never widens).
                 SettingsPanel {
                     id: hotkeyPopover
                     visible: toolbar.visible && root.settingsOpen
@@ -289,7 +266,7 @@ ShellRoot {
                                             win.width - width - 8))
                     y: toolbar.y - height - 6
                     onCloseRequested: root.settingsOpen = false
-                    onRebound: Qt.quit()   // close so the freshly-bound hotkey is usable immediately
+                    onRebound: Qt.quit()
                 }
             }
 
@@ -299,9 +276,6 @@ ShellRoot {
         }
     }
 
-    // ---- gated self-validation (RISHOT_TESTRECT=1) ----
-    // Seed a within-DP-1 selection, enter editing, add a Rect annotation inside it, grab the
-    // export to /tmp, and fire a real Copy (auto-save + wl-copy). Leaves PNGs for inspection.
     Timer {
         id: testDriver
         interval: 400
@@ -309,7 +283,6 @@ ShellRoot {
         onTriggered: {
             root.globalSel = { x: 2750, y: 350, w: 760, h: 480 };
             root.phase = "editing";
-            // a vermilion rect annotation inside the selection
             root.model.add({
                 type: "rect",
                 points: [{ x: 2850, y: 450 }, { x: 3300, y: 700 }],
@@ -327,7 +300,6 @@ ShellRoot {
         onTriggered: {
             root.grabTo("/tmp/rishot-p2-annotated.png", function (ok) {
                 console.log("rishot-test: annotated grab ok=" + ok);
-                // also exercise the real Copy path (auto-save + wl-copy + quit)
                 root.doCopy();
             });
         }

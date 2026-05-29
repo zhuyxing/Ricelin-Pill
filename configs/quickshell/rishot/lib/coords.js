@@ -1,5 +1,3 @@
-// rishot — pure coordinate math for the multi-output global space. No Qt imports.
-
 function globalToLocal(point, screenX, screenY) {
     return { x: point.x - screenX, y: point.y - screenY };
 }
@@ -8,8 +6,6 @@ function localToGlobal(point, screenX, screenY) {
     return { x: point.x + screenX, y: point.y + screenY };
 }
 
-// Intersect a global-space rect {x,y,w,h} with a screen rect {x,y,width,height}.
-// Returns the overlapping region in coords LOCAL to that screen, or null if disjoint.
 function intersectRect(globalRect, screenRect) {
     var gx1 = globalRect.x;
     var gy1 = globalRect.y;
@@ -36,7 +32,6 @@ function intersectRect(globalRect, screenRect) {
     };
 }
 
-// Normalize two global points (press, current) into a {x,y,w,h} rect with positive size.
 function rectFromPoints(a, b) {
     var x = Math.min(a.x, b.x);
     var y = Math.min(a.y, b.y);
