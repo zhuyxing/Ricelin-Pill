@@ -16,7 +16,6 @@ hl.bind(mod .. " + mouse_up",   hl.dsp.focus({ workspace = "r-1" }))
 hl.bind(mod .. " + mouse_down", hl.dsp.focus({ workspace = "r+1" }))
 
 hl.bind("Print",                hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/screenshot-region.sh"))
-hl.bind("SHIFT + Print",        hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/screenshot-annotate.sh"))
 
 hl.bind(mod .. " + SHIFT + C",  hl.dsp.exec_cmd("hyprpicker -a"))
 

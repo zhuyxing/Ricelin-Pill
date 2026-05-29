@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
-# Quick: drag region with slurp -> copy to clipboard + save. No editor.
+# Interim quick shot: drag region (slurp, multi-monitor OK) -> copy + save.
+# Replaced later by the custom Quickshell annotate tool.
 set -euo pipefail
 
 region=$(slurp) || exit 0
