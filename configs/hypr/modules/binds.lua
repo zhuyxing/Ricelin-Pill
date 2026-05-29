@@ -14,3 +14,10 @@ hl.bind(mod .. " + Left",       hl.dsp.focus({ workspace = "r-1" }))
 hl.bind(mod .. " + Right",      hl.dsp.focus({ workspace = "r+1" }))
 hl.bind(mod .. " + mouse_up",   hl.dsp.focus({ workspace = "r-1" }))
 hl.bind(mod .. " + mouse_down", hl.dsp.focus({ workspace = "r+1" }))
+
+hl.bind("Print",                hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/screenshot-region.sh"))
+hl.bind("SHIFT + Print",        hl.dsp.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/screenshot-annotate.sh"))
+
+hl.bind(mod .. " + SHIFT + C",  hl.dsp.exec_cmd("hyprpicker -a"))
+
+hl.bind(mod .. " + V",          hl.dsp.exec_cmd("sh -c 'cliphist list | rofi -dmenu | cliphist decode | wl-copy'"))
