@@ -11,14 +11,20 @@ ShellRoot {
     property string query: ""
     property var usage: ({})
     property bool shown: false
-
-    onShownChanged: if (shown) root.query = "";
+    property string targetMonitor: ""
 
     IpcHandler {
         target: "launcher"
-        function toggle(): void { root.shown = !root.shown; }
-        function show(): void { root.shown = true; }
+        function show(mon: string): void {
+            root.targetMonitor = mon;
+            root.shown = true;
+        }
         function hide(): void { root.shown = false; }
+        function toggle(mon: string): void {
+            if (root.shown) { root.shown = false; return; }
+            root.targetMonitor = mon;
+            root.shown = true;
+        }
     }
 
     FileView {
@@ -61,16 +67,15 @@ ShellRoot {
         root.shown = false;
     }
 
-    LazyLoader {
-        active: root.shown
+    Variants {
+        model: Quickshell.screens
 
         PanelWindow {
             id: win
-            visible: true
-            screen: {
-                var m = Hyprland.focusedMonitor;
-                return m && m.screen ? m.screen : Quickshell.screens[0];
-            }
+            required property var modelData
+            screen: modelData
+            visible: root.shown && root.targetMonitor === modelData.name
+
             color: "transparent"
             exclusionMode: ExclusionMode.Ignore
             WlrLayershell.layer: WlrLayer.Overlay
@@ -103,7 +108,13 @@ ShellRoot {
                 }
             }
 
-            Component.onCompleted: launcher.focusField()
+            onVisibleChanged: {
+                if (visible) {
+                    root.query = "";
+                    launcher.selectedIndex = 0;
+                    launcher.focusField();
+                }
+            }
         }
     }
 }
