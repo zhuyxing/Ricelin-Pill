@@ -3,3 +3,4 @@ hl.exec_cmd("sh -c 'pgrep -f \"wl-paste --type image --watch cliphist\" >/dev/nu
 hl.exec_cmd(os.getenv("HOME") .. "/.config/hypr/scripts/wallpaper.sh init")
 hl.exec_cmd("hyprctl setcursor Bibata-Modern-Ice 24")
 hl.exec_cmd("systemctl --user start hyprpolkitagent")
+hl.exec_cmd("sh -c 'pgrep -f \"qs -c launcher\" >/dev/null || qs -c launcher -d'")
