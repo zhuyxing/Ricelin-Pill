@@ -110,7 +110,7 @@ ShellRoot {
 
             onVisibleChanged: {
                 if (visible) {
-                    root.query = "";
+                    launcher.query = "";
                     launcher.selectedIndex = 0;
                     launcher.focusField();
                 }
