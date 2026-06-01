@@ -1,7 +1,4 @@
 #!/usr/bin/env bash
-# Wallpaper via awww (formerly swww) with a wave transition.
-# Usage: wallpaper.sh init   -> autostart: restore the last wallpaper (random on first run); no-op on reload
-#        wallpaper.sh         -> cycle to a new random wallpaper now (SUPER+B)
 set -euo pipefail
 
 WPDIR="$HOME/Ricelin/wallpapers"
@@ -29,9 +26,7 @@ awww query >/dev/null 2>&1 || daemon_was_running=false
 ensure_daemon || exit 0
 
 if [ "${1:-}" = "init" ]; then
-    # Config reload: daemon already up -> keep the current wallpaper.
     [ "$daemon_was_running" = true ] && exit 0
-    # Fresh boot: restore the last-set wallpaper, fall back to random on first run.
     if [ -r "$STATE" ] && pic=$(cat "$STATE") && [ -f "$pic" ]; then
         :
     else
