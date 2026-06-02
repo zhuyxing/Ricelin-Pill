@@ -6,9 +6,8 @@ import QtMultimedia
 Item {
     id: root
 
-    readonly property bool hasScreens: (typeof screenModel !== "undefined") && (typeof primaryScreen !== "undefined")
-    readonly property rect primaryGeometry: hasScreens ? screenModel.geometry(primaryScreen) : Qt.rect(0, 0, Screen.width, Screen.height)
-    readonly property bool onPrimary: !hasScreens || (Screen.virtualX === primaryGeometry.x && Screen.virtualY === primaryGeometry.y)
+    readonly property bool hasScreens: (typeof primaryScreen !== "undefined")
+    readonly property bool onPrimary: !hasScreens || (primaryScreen === true)
 
     readonly property bool hasSddm: typeof sddm !== "undefined"
     readonly property bool hasConfig: typeof config !== "undefined"
