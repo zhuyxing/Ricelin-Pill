@@ -117,6 +117,10 @@ Item {
             RowLayout {
                 spacing: 2 * bar.s
 
+                Minimized {
+                    s: bar.s
+                }
+
                 Tray {
                     s: bar.s
                     barWindow: bar.barWindow

@@ -6,6 +6,7 @@ hl.bind(mod .. " + Return",    hl.dsp.exec_cmd("ghostty"))
 hl.bind(mod .. " + F",         hl.dsp.window.fullscreen())
 hl.bind(mod .. " + E",         hl.dsp.exec_cmd("dolphin"))
 hl.bind(mod .. " + T",         hl.dsp.window.float({ action = "toggle" }))
+hl.bind(mod .. " + M",         hl.dsp.window.move({ workspace = "special:minimized", follow = false }))
 
 hl.bind(mod .. " + mouse:272", hl.dsp.window.drag(),   { mouse = true })
 hl.bind(mod .. " + mouse:273", hl.dsp.window.resize(), { mouse = true })
