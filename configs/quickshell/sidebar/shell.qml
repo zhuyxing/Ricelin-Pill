@@ -65,20 +65,25 @@ ShellRoot {
             readonly property real s: modelData ? Math.min(modelData.height / 1080, 1.0) : 1
             readonly property real screenScale: modelData ? modelData.height / 1080 : 1
             readonly property real barBottom: 42 * screenScale
+            readonly property bool active: root.shown && (root.targetMonitor === "" || root.targetMonitor === modelData.name)
 
             screen: modelData
-            visible: root.shown && (root.targetMonitor === "" || root.targetMonitor === modelData.name)
+            visible: true
             color: "transparent"
 
             exclusionMode: ExclusionMode.Ignore
             WlrLayershell.layer: WlrLayer.Overlay
-            WlrLayershell.keyboardFocus: root.shown ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+            WlrLayershell.keyboardFocus: win.active ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
             WlrLayershell.namespace: "sidebar"
+
+            mask: win.active ? null : emptyRegion
+            Region { id: emptyRegion }
 
             anchors { top: true; right: true; bottom: true; left: true }
 
             MouseArea {
                 anchors.fill: parent
+                enabled: win.active
                 onClicked: root.shown = false
             }
 
@@ -91,7 +96,7 @@ ShellRoot {
                 anchors.topMargin: win.barBottom + 12 * win.screenScale
                 anchors.rightMargin: 12 * win.screenScale
                 anchors.bottomMargin: 12 * win.screenScale
-                opened: win.visible
+                opened: win.active
                 onRequestClose: root.shown = false
             }
         }
