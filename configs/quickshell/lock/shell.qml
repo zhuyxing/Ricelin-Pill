@@ -36,6 +36,5 @@ ShellRoot {
     IpcHandler {
         target: "lock"
         function lock(): void { sessionLock.locked = true; }
-        function unlock(): void { sessionLock.locked = false; }
     }
 }
