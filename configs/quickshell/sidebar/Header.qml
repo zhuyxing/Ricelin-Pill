@@ -112,18 +112,6 @@ Rectangle {
             anchors.centerIn: parent
             spacing: 6 * root.s
 
-            Rectangle {
-                anchors.verticalCenter: parent.verticalCenter
-                width: 11 * root.s; height: 11 * root.s; radius: width / 2
-                color: "transparent"
-                border.width: 1.5 * root.s
-                border.color: Theme.vermLit
-                Rectangle {
-                    anchors.centerIn: parent
-                    width: 1.5 * root.s; height: 4 * root.s
-                    color: Theme.vermLit
-                }
-            }
             Row {
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: 4 * root.s

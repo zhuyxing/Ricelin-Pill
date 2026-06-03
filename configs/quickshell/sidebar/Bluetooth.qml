@@ -123,33 +123,13 @@ Card {
                 }
             }
         }
-        Rectangle {
+        Toggle {
             id: toggle
             anchors.right: parent.right
             anchors.verticalCenter: parent.verticalCenter
-            width: 38 * root.s; height: 21 * root.s; radius: 11 * root.s
-            border.width: 1
-            property bool on: root.adapter ? root.adapter.enabled : false
-            border.color: on ? Theme.vermLit : Theme.border
-            color: on ? "transparent" : Theme.tileBg
-            gradient: on ? onGrad : null
-            Gradient {
-                id: onGrad
-                GradientStop { position: 0.0; color: Theme.vermLit }
-                GradientStop { position: 1.0; color: Theme.verm }
-            }
-            Rectangle {
-                width: 15 * root.s; height: 15 * root.s; radius: width / 2
-                color: toggle.on ? Theme.onAccent : Theme.dim
-                y: 2 * root.s
-                x: toggle.on ? parent.width - width - 2 * root.s : 2 * root.s
-                Behavior on x { NumberAnimation { duration: 130 } }
-            }
-            MouseArea {
-                anchors.fill: parent
-                cursorShape: Qt.PointingHandCursor
-                onClicked: if (root.adapter) root.adapter.enabled = !root.adapter.enabled
-            }
+            s: root.s
+            on: root.adapter ? root.adapter.enabled : false
+            onToggled: if (root.adapter) root.adapter.enabled = !root.adapter.enabled
         }
     }
 
