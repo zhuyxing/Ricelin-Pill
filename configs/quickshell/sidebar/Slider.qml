@@ -27,7 +27,7 @@ Item {
         }
         Rectangle {
             width: 17 * root.s; height: 17 * root.s; radius: 99
-            color: "#f1e4db"; border.width: 2; border.color: Theme.vermLit
+            color: Theme.knob; border.width: 2; border.color: Theme.vermLit
             y: (parent.height - height) / 2
             x: Math.max(0, Math.min(1, root.value)) * parent.width - width / 2
         }

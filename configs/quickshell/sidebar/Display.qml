@@ -92,7 +92,7 @@ Card {
             width: 34 * root.s
             horizontalAlignment: Text.AlignRight
             text: valueLabel
-            color: "#b9a99e"
+            color: Theme.subtle
             font.family: Theme.font
             font.pixelSize: 11 * root.s
             font.weight: Font.DemiBold

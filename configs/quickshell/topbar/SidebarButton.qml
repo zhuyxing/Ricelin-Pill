@@ -1,15 +1,13 @@
 import QtQuick
 import QtQuick.Effects
 import Quickshell
+import "Singletons"
 
 Item {
     id: btn
 
     property real s: 1
     property string screenName: ""
-
-    readonly property color vermLit: "#e0563b"
-    readonly property color sheen: Qt.rgba(230 / 255, 214 / 255, 203 / 255, 0.07)
 
     implicitWidth: 28 * btn.s
     implicitHeight: 28 * btn.s
@@ -18,7 +16,7 @@ Item {
         id: hover
         anchors.fill: parent
         radius: 7 * btn.s
-        color: btn.sheen
+        color: Theme.sheen
         opacity: area.containsMouse ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 120 } }
     }
@@ -41,7 +39,7 @@ Item {
         anchors.fill: glyph
         source: glyph
         colorization: 1.0
-        colorizationColor: btn.vermLit
+        colorizationColor: Theme.vermLit
         opacity: area.containsMouse ? 1 : 0.82
         Behavior on opacity { NumberAnimation { duration: 120 } }
     }

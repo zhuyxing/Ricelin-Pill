@@ -65,7 +65,7 @@ Card {
                     anchors.fill: btHead
                     source: btHead
                     colorization: 1.0
-                    colorizationColor: "#cdbfb4"
+                    colorizationColor: Theme.iconDim
                 }
             }
             Text {
@@ -140,7 +140,7 @@ Card {
             }
             Rectangle {
                 width: 15 * root.s; height: 15 * root.s; radius: width / 2
-                color: toggle.on ? "#fbeee7" : Theme.dim
+                color: toggle.on ? Theme.onAccent : Theme.dim
                 y: 2 * root.s
                 x: toggle.on ? parent.width - width - 2 * root.s : 2 * root.s
                 Behavior on x { NumberAnimation { duration: 130 } }
@@ -228,14 +228,14 @@ Card {
                                 spacing: 1 * root.s
                                 Text {
                                     text: modelData ? (modelData.deviceName || modelData.name || "Unknown") : "Unknown"
-                                    color: isConnected ? Theme.cream : "#b9a99e"
+                                    color: isConnected ? Theme.cream : Theme.subtle
                                     font.family: Theme.font
                                     font.pixelSize: 12.5 * root.s
                                     font.weight: isConnected ? Font.DemiBold : Font.Medium
                                 }
                                 Text {
                                     text: root.metaFor(modelData)
-                                    color: "#6f635b"
+                                    color: Theme.faint
                                     font.family: Theme.font
                                     font.pixelSize: 10 * root.s
                                     font.weight: Font.Medium

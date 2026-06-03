@@ -103,7 +103,7 @@ Card {
                     Text {
                         visible: root.ethSpeedText.length > 0
                         text: root.ethSpeedText
-                        color: "#b9a99e"
+                        color: Theme.subtle
                         font.family: Theme.font
                         font.pixelSize: 11 * root.s
                         font.weight: Font.DemiBold
@@ -127,7 +127,7 @@ Card {
                     id: ipText
                     anchors.centerIn: parent
                     text: root.ethIp
-                    color: "#b9a99e"
+                    color: Theme.subtle
                     font.family: Theme.font
                     font.pixelSize: 11 * root.s
                     font.weight: Font.DemiBold
@@ -211,7 +211,7 @@ Card {
                     Text {
                         anchors.verticalCenter: parent.verticalCenter
                         text: "Disconnect"
-                        color: "#b9a99e"
+                        color: Theme.subtle
                         font.family: Theme.font
                         font.pixelSize: 10.5 * root.s
                         font.weight: Font.DemiBold

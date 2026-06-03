@@ -1,14 +1,12 @@
 import QtQuick
 import QtQuick.Effects
 import Quickshell.Services.Mpris
+import "Singletons"
 
 Item {
     id: mpris
 
     property real s: 1
-
-    readonly property color vermLit: "#e0563b"
-    readonly property color cream: "#e6d6cb"
 
     readonly property var player: {
         var list = Mpris.players.values;
@@ -86,7 +84,7 @@ Item {
         height: 15 * mpris.s
         source: noteSrc
         colorization: 1.0
-        colorizationColor: mpris.vermLit
+        colorizationColor: Theme.vermLit
     }
 
     Item {
@@ -105,8 +103,8 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             x: 0
             text: mpris.label
-            color: mpris.cream
-            font.family: "Inter"
+            color: Theme.cream
+            font.family: Theme.font
             font.pixelSize: 12 * mpris.s
             font.weight: Font.Medium
             elide: textClip.overflowing ? Text.ElideNone : Text.ElideRight

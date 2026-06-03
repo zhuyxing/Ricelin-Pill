@@ -1,14 +1,12 @@
 import QtQuick
 import Quickshell
+import "Singletons"
 
 Item {
     id: clock
 
     property real s: 1
     property var barWindow
-
-    readonly property color cream: "#e6d6cb"
-    readonly property color dim: "#8a7d74"
 
     readonly property var deLocale: Qt.locale("de_DE")
 
@@ -28,8 +26,8 @@ Item {
         Text {
             anchors.verticalCenter: parent.verticalCenter
             text: Qt.formatDateTime(sysClock.date, "HH:mm")
-            color: clock.cream
-            font.family: "Inter"
+            color: Theme.cream
+            font.family: Theme.font
             font.pixelSize: 13 * clock.s
             font.weight: Font.DemiBold
             font.features: { "tnum": 1 }
@@ -39,14 +37,14 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             width: 1
             height: 13 * clock.s
-            color: Qt.rgba(150 / 255, 172 / 255, 212 / 255, 0.16)
+            color: Theme.hair
         }
 
         Text {
             anchors.verticalCenter: parent.verticalCenter
             text: sysClock.date.toLocaleDateString(clock.deLocale, "ddd dd MMM").toUpperCase()
-            color: clock.dim
-            font.family: "Inter"
+            color: Theme.dim
+            font.family: Theme.font
             font.pixelSize: 10 * clock.s
             font.weight: Font.Medium
             font.letterSpacing: 1.2 * clock.s

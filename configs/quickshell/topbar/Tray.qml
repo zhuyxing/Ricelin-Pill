@@ -6,21 +6,13 @@ import QtQuick.Effects
 import Quickshell
 import Quickshell.Wayland
 import Quickshell.Services.SystemTray
+import "Singletons"
 
 Item {
     id: tray
 
     property real s: 1
     property var barWindow
-
-    readonly property color vermLit: "#e0563b"
-    readonly property color cream: "#e6d6cb"
-    readonly property color dim: "#8a7d74"
-    readonly property color hair: Qt.rgba(150 / 255, 172 / 255, 212 / 255, 0.16)
-    readonly property color sheen: Qt.rgba(230 / 255, 214 / 255, 203 / 255, 0.07)
-    readonly property color barTop: "#2e231b"
-    readonly property color barBot: "#221813"
-    readonly property color barBorder: "#3a2a22"
 
     visible: SystemTray.items.values.length > 0
     implicitWidth: visible ? row.implicitWidth : 0
@@ -59,7 +51,7 @@ Item {
                     id: hover
                     anchors.fill: parent
                     radius: 7 * tray.s
-                    color: tray.sheen
+                    color: Theme.sheen
                     opacity: area.containsMouse ? 1 : 0
                     Behavior on opacity { NumberAnimation { duration: 120 } }
                 }
@@ -142,11 +134,11 @@ Item {
                 clip: true
 
                 gradient: Gradient {
-                    GradientStop { position: 0.0; color: tray.barTop }
-                    GradientStop { position: 1.0; color: tray.barBot }
+                    GradientStop { position: 0.0; color: Theme.cardTop }
+                    GradientStop { position: 1.0; color: Theme.cardBot }
                 }
                 border.width: 1
-                border.color: tray.barBorder
+                border.color: Theme.border
 
                 implicitHeight: col.implicitHeight + 12 * tray.s
                 height: implicitHeight
@@ -159,13 +151,13 @@ Item {
                     anchors.leftMargin: 10 * tray.s
                     anchors.rightMargin: 10 * tray.s
                     height: 1
-                    color: tray.sheen
+                    color: Theme.sheen
                 }
 
                 layer.enabled: true
                 layer.effect: MultiEffect {
                     shadowEnabled: true
-                    shadowColor: Qt.rgba(0, 0, 0, 0.55)
+                    shadowColor: Theme.shadow
                     shadowBlur: 0.9
                     shadowVerticalOffset: 4 * tray.s
                 }
@@ -197,7 +189,7 @@ Item {
                                 anchors.leftMargin: 8 * tray.s
                                 anchors.rightMargin: 8 * tray.s
                                 height: 1
-                                color: tray.hair
+                                color: Theme.hair
                             }
 
                             Rectangle {
@@ -205,7 +197,7 @@ Item {
                                 anchors.fill: parent
                                 radius: 8 * tray.s
                                 color: rowArea.containsMouse && entry.modelData.enabled
-                                    ? Qt.rgba(192 / 255, 68 / 255, 43 / 255, 0.16) : "transparent"
+                                    ? Theme.accent16 : "transparent"
 
                                 Rectangle {
                                     anchors.left: parent.left
@@ -214,7 +206,7 @@ Item {
                                     width: 3 * tray.s
                                     height: parent.height * 0.46
                                     radius: width / 2
-                                    color: tray.vermLit
+                                    color: Theme.vermLit
                                     opacity: rowArea.containsMouse && entry.modelData.enabled ? 1 : 0
                                     Behavior on opacity { NumberAnimation { duration: 120 } }
                                 }
@@ -242,9 +234,9 @@ Item {
                                     anchors.right: parent.right
                                     anchors.rightMargin: 14 * tray.s
                                     text: entry.modelData.text
-                                    color: !entry.modelData.enabled ? tray.dim
-                                        : (rowArea.containsMouse ? tray.cream : Qt.rgba(230 / 255, 214 / 255, 203 / 255, 0.82))
-                                    font.family: "Inter"
+                                    color: !entry.modelData.enabled ? Theme.dim
+                                        : (rowArea.containsMouse ? Theme.cream : Qt.rgba(230 / 255, 214 / 255, 203 / 255, 0.82))
+                                    font.family: Theme.font
                                     font.pixelSize: 13 * tray.s
                                     font.weight: rowArea.containsMouse ? Font.DemiBold : Font.Normal
                                     elide: Text.ElideRight

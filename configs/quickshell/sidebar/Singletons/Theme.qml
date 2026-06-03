@@ -15,7 +15,13 @@ Singleton {
     readonly property color border:   "#3a2a22"
     readonly property color tileBg:   "#211711"
     readonly property color trackBg:  "#1a110c"
-    readonly property color hair:     Qt.rgba(150/255, 172/255, 212/255, 0.16)
+    readonly property color subtle:   "#b9a99e"
+    readonly property color faint:    "#6f635b"
+    readonly property color disabled: "#5a5048"
+    readonly property color onAccent: "#fbeee7"
+    readonly property color iconDim:  "#cdbfb4"
+    readonly property color knob:     "#f1e4db"
+    readonly property color hair:     Qt.rgba(230/255, 214/255, 203/255, 0.13)
     readonly property color sheen:    Qt.rgba(230/255, 214/255, 203/255, 0.07)
     readonly property color accent16: Qt.rgba(192/255, 68/255, 43/255, 0.16)
     readonly property color accent45: Qt.rgba(224/255, 86/255, 59/255, 0.45)

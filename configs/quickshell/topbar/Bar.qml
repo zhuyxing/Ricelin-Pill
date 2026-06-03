@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Effects
+import "Singletons"
 
 Item {
     id: bar
@@ -10,25 +11,16 @@ Item {
     property real s: 1
     property var barWindow
 
-    readonly property color vermLit: "#e0563b"
-    readonly property color cream: "#e6d6cb"
-    readonly property color dim: "#8a7d74"
-    readonly property color hair: Qt.rgba(150 / 255, 172 / 255, 212 / 255, 0.16)
-    readonly property color sheen: Qt.rgba(230 / 255, 214 / 255, 203 / 255, 0.07)
-    readonly property color barTop: "#2e231b"
-    readonly property color barBot: "#221813"
-    readonly property color barBorder: "#3a2a22"
-
     Rectangle {
         id: frame
         anchors.fill: parent
         radius: 22
         border.width: 1
-        border.color: bar.barBorder
+        border.color: Theme.border
         clip: true
         gradient: Gradient {
-            GradientStop { position: 0.0; color: bar.barTop }
-            GradientStop { position: 1.0; color: bar.barBot }
+            GradientStop { position: 0.0; color: Theme.cardTop }
+            GradientStop { position: 1.0; color: Theme.cardBot }
         }
 
         Rectangle {
@@ -39,7 +31,7 @@ Item {
             anchors.leftMargin: 12
             anchors.rightMargin: 12
             height: 1
-            color: bar.sheen
+            color: Theme.sheen
         }
 
         Item {
@@ -76,7 +68,7 @@ Item {
                         source: toriiImg
                         anchors.fill: toriiImg
                         colorization: 1.0
-                        colorizationColor: bar.vermLit
+                        colorizationColor: Theme.vermLit
                     }
                 }
 
@@ -109,7 +101,7 @@ Item {
                 Layout.preferredWidth: 1
                 Layout.preferredHeight: 16 * bar.s
                 Layout.alignment: Qt.AlignVCenter
-                color: bar.hair
+                color: Theme.hair
             }
 
             RowLayout {

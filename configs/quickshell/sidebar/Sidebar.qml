@@ -11,6 +11,7 @@ Item {
     implicitWidth: panelWidth
 
     focus: opened
+    onOpenedChanged: if (opened) forceActiveFocus()
     Keys.onEscapePressed: sidebar.requestClose()
 
     Rectangle {

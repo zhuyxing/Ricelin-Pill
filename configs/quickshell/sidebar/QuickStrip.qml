@@ -70,7 +70,7 @@ RowLayout {
                     anchors.fill: pIcon
                     source: pIcon
                     colorization: 1.0
-                    colorizationColor: active ? "#fbeee7" : "#cdbfb4"
+                    colorizationColor: active ? Theme.onAccent : Theme.iconDim
                 }
             }
 
@@ -79,7 +79,7 @@ RowLayout {
                 spacing: 1 * root.s
                 Text {
                     text: title
-                    color: active ? "#fbeee7" : Theme.cream
+                    color: active ? Theme.onAccent : Theme.cream
                     font.family: Theme.font
                     font.pixelSize: 12 * root.s
                     font.weight: Font.DemiBold

@@ -3,21 +3,13 @@ import QtQuick.Effects
 import Quickshell
 import Quickshell.Hyprland
 import Quickshell.Wayland
+import "Singletons"
 
 Item {
     id: btn
 
     property real s: 1
     property var barWindow
-
-    readonly property color vermLit: "#e0563b"
-    readonly property color cream: "#e6d6cb"
-    readonly property color dim: "#8a7d74"
-    readonly property color hair: Qt.rgba(150 / 255, 172 / 255, 212 / 255, 0.16)
-    readonly property color sheen: Qt.rgba(230 / 255, 214 / 255, 203 / 255, 0.07)
-    readonly property color barTop: "#2e231b"
-    readonly property color barBot: "#221813"
-    readonly property color barBorder: "#3a2a22"
 
     readonly property var actions: [
         { label: "Lock", argv: ["loginctl", "lock-session"] },
@@ -41,7 +33,7 @@ Item {
         id: hover
         anchors.fill: parent
         radius: 7 * btn.s
-        color: btn.sheen
+        color: Theme.sheen
         opacity: area.containsMouse || menu.open ? 1 : 0
         Behavior on opacity { NumberAnimation { duration: 120 } }
     }
@@ -64,7 +56,7 @@ Item {
         anchors.fill: glyph
         source: glyph
         colorization: 1.0
-        colorizationColor: btn.vermLit
+        colorizationColor: Theme.vermLit
         opacity: area.containsMouse || menu.open ? 1 : 0.82
         Behavior on opacity { NumberAnimation { duration: 120 } }
     }
@@ -116,11 +108,11 @@ Item {
                 clip: true
 
                 gradient: Gradient {
-                    GradientStop { position: 0.0; color: btn.barTop }
-                    GradientStop { position: 1.0; color: btn.barBot }
+                    GradientStop { position: 0.0; color: Theme.cardTop }
+                    GradientStop { position: 1.0; color: Theme.cardBot }
                 }
                 border.width: 1
-                border.color: btn.barBorder
+                border.color: Theme.border
 
                 implicitHeight: col.implicitHeight + 12 * btn.s
                 height: implicitHeight
@@ -133,13 +125,13 @@ Item {
                     anchors.leftMargin: 10 * btn.s
                     anchors.rightMargin: 10 * btn.s
                     height: 1
-                    color: btn.sheen
+                    color: Theme.sheen
                 }
 
                 layer.enabled: true
                 layer.effect: MultiEffect {
                     shadowEnabled: true
-                    shadowColor: Qt.rgba(0, 0, 0, 0.55)
+                    shadowColor: Theme.shadow
                     shadowBlur: 0.9
                     shadowVerticalOffset: 4 * btn.s
                 }
@@ -166,7 +158,7 @@ Item {
                             Rectangle {
                                 width: parent.width
                                 height: 1
-                                color: btn.hair
+                                color: Theme.hair
                                 visible: index > 0
                             }
 
@@ -175,7 +167,7 @@ Item {
                                 width: parent.width
                                 height: 34 * btn.s
                                 radius: 8 * btn.s
-                                color: rowArea.containsMouse ? Qt.rgba(192 / 255, 68 / 255, 43 / 255, 0.16) : "transparent"
+                                color: rowArea.containsMouse ? Theme.accent16 : "transparent"
 
                                 Rectangle {
                                     anchors.left: parent.left
@@ -184,7 +176,7 @@ Item {
                                     width: 3 * btn.s
                                     height: parent.height * 0.46
                                     radius: width / 2
-                                    color: btn.vermLit
+                                    color: Theme.vermLit
                                     opacity: rowArea.containsMouse ? 1 : 0
                                     Behavior on opacity { NumberAnimation { duration: 120 } }
                                 }
@@ -194,8 +186,8 @@ Item {
                                     anchors.verticalCenter: parent.verticalCenter
                                     anchors.leftMargin: 18 * btn.s
                                     text: modelData.label
-                                    color: rowArea.containsMouse ? btn.cream : btn.dim
-                                    font.family: "Inter"
+                                    color: rowArea.containsMouse ? Theme.cream : Theme.dim
+                                    font.family: Theme.font
                                     font.pixelSize: 13 * btn.s
                                     font.weight: rowArea.containsMouse ? Font.DemiBold : Font.Normal
                                 }

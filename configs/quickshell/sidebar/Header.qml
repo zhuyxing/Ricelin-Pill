@@ -41,12 +41,6 @@ Rectangle {
         GradientStop { position: 0.0; color: Theme.panelTop }
         GradientStop { position: 1.0; color: Theme.panelBot }
     }
-    Rectangle {
-        anchors { left: parent.left; right: parent.right; top: parent.top }
-        anchors.margins: 1
-        height: 1; radius: 16 * root.s
-        color: Theme.sheen
-    }
 
     Row {
         anchors.fill: parent

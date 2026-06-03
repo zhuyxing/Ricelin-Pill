@@ -39,7 +39,7 @@ Card {
             }
             Text {
                 text: sinkRow.device
-                color: "#b9a99e"
+                color: Theme.subtle
                 font.family: Theme.font
                 font.pixelSize: 11.5 * root.s
                 font.weight: Font.DemiBold
@@ -75,13 +75,13 @@ Card {
                         anchors.fill: chevIcon
                         source: chevIcon
                         colorization: 1.0
-                        colorizationColor: "#b9a99e"
+                        colorizationColor: Theme.subtle
                     }
                 }
                 Text {
                     anchors.verticalCenter: parent.verticalCenter
                     text: sinkRow.chip
-                    color: "#b9a99e"
+                    color: Theme.subtle
                     font.family: Theme.font
                     font.pixelSize: 10.5 * root.s
                     font.weight: Font.DemiBold
@@ -130,7 +130,7 @@ Card {
                             anchors.verticalCenter: parent.verticalCenter
                             text: modelData && modelData.description ? modelData.description : (modelData && modelData.name ? modelData.name : "")
                             elide: Text.ElideRight
-                            color: "#b9a99e"
+                            color: Theme.subtle
                             font.family: Theme.font
                             font.pixelSize: 11 * root.s
                             font.weight: Font.DemiBold
@@ -191,7 +191,7 @@ Card {
             width: 34 * root.s
             horizontalAlignment: Text.AlignRight
             text: volRow.valueLabel
-            color: "#b9a99e"
+            color: Theme.subtle
             font.family: Theme.font
             font.pixelSize: 11 * root.s
             font.weight: Font.DemiBold
@@ -228,7 +228,7 @@ Card {
                 anchors.fill: micOffImg
                 source: micOffImg
                 colorization: 1.0
-                colorizationColor: volRow.micMuted ? Theme.vermLit : "#b9a99e"
+                colorizationColor: volRow.micMuted ? Theme.vermLit : Theme.subtle
             }
             MouseArea {
                 anchors.fill: parent

@@ -4,14 +4,12 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Hyprland
+import "Singletons"
 
 Item {
     id: min
 
     property real s: 1
-
-    readonly property color sheen: Qt.rgba(230 / 255, 214 / 255, 203 / 255, 0.07)
-    readonly property color verm: "#c0442b"
 
     readonly property var entries: {
         var out = [];
@@ -62,7 +60,7 @@ Item {
                 Rectangle {
                     anchors.fill: parent
                     radius: 7 * min.s
-                    color: area.containsMouse ? min.sheen : "transparent"
+                    color: area.containsMouse ? Theme.sheen : "transparent"
                     Behavior on color { ColorAnimation { duration: 120 } }
                 }
 
@@ -73,7 +71,7 @@ Item {
                     width: 5 * min.s
                     height: 2 * min.s
                     radius: 1
-                    color: min.verm
+                    color: Theme.verm
                     opacity: 0.7
                 }
 

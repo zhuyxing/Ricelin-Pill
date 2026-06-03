@@ -74,17 +74,11 @@ Rectangle {
         GradientStop { position: 0.0; color: Theme.panelTop }
         GradientStop { position: 1.0; color: Theme.panelBot }
     }
-    Rectangle {
-        anchors { left: parent.left; right: parent.right; top: parent.top }
-        anchors.margins: 1
-        height: 1; radius: 16 * root.s
-        color: Theme.sheen
-    }
 
     component TBtn: Item {
         property string icon: ""
         property real box: 20
-        property string tint: "#b9a99e"
+        property color tint: Theme.subtle
         width: box * root.s; height: box * root.s
         signal clicked()
         Image {
@@ -233,7 +227,7 @@ Rectangle {
                 Text {
                     anchors.left: parent.left
                     text: root.fmt(root.positionSec)
-                    color: "#6f635b"
+                    color: Theme.faint
                     font.family: Theme.font
                     font.pixelSize: 10 * root.s
                     font.weight: Font.DemiBold
@@ -241,7 +235,7 @@ Rectangle {
                 Text {
                     anchors.right: parent.right
                     text: root.fmt(root.lengthSec)
-                    color: "#6f635b"
+                    color: Theme.faint
                     font.family: Theme.font
                     font.pixelSize: 10 * root.s
                     font.weight: Font.DemiBold
@@ -260,7 +254,7 @@ Rectangle {
                 TBtn {
                     icon: "prev"
                     box: 20
-                    tint: root.hasPlayer && root.player.canGoPrevious ? "#b9a99e" : "#5a5048"
+                    tint: root.hasPlayer && root.player.canGoPrevious ? Theme.subtle : Theme.disabled
                     anchors.verticalCenter: parent.verticalCenter
                     onClicked: if (root.player && root.player.canGoPrevious) root.player.previous()
                 }
@@ -287,7 +281,7 @@ Rectangle {
                         anchors.fill: playImg
                         source: playImg
                         colorization: 1.0
-                        colorizationColor: "#fbeee7"
+                        colorizationColor: Theme.onAccent
                     }
                     MouseArea {
                         anchors.fill: parent
@@ -298,7 +292,7 @@ Rectangle {
                 TBtn {
                     icon: "next"
                     box: 20
-                    tint: root.hasPlayer && root.player.canGoNext ? "#b9a99e" : "#5a5048"
+                    tint: root.hasPlayer && root.player.canGoNext ? Theme.subtle : Theme.disabled
                     anchors.verticalCenter: parent.verticalCenter
                     onClicked: if (root.player && root.player.canGoNext) root.player.next()
                 }

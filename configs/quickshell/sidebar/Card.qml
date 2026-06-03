@@ -16,12 +16,6 @@ Rectangle {
         GradientStop { position: 0.0; color: Theme.panelTop }
         GradientStop { position: 1.0; color: Theme.panelBot }
     }
-    Rectangle {
-        anchors { left: parent.left; right: parent.right; top: parent.top }
-        anchors.margins: 1
-        height: 1; radius: 16 * card.s
-        color: Theme.sheen
-    }
     Column {
         id: body
         anchors.fill: parent

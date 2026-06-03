@@ -3,6 +3,7 @@ pragma ComponentBehavior: Bound
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
+import "Singletons"
 
 PanelWindow {
     id: pop
@@ -10,17 +11,6 @@ PanelWindow {
     property real s: 1
     property var anchorWindow
     property bool open: false
-
-    readonly property color vermDeep: "#a3371f"
-    readonly property color vermLit: "#e0563b"
-    readonly property color cream: "#e6d6cb"
-    readonly property color dim: "#8a7d74"
-    readonly property color hair: Qt.rgba(150 / 255, 172 / 255, 212 / 255, 0.16)
-    readonly property color sheen: Qt.rgba(230 / 255, 214 / 255, 203 / 255, 0.07)
-    readonly property color barTop: "#2e231b"
-    readonly property color barBot: "#221813"
-    readonly property color barBorder: "#3a2a22"
-    readonly property color slotBg: "#2c1f19"
 
     readonly property var deLocale: Qt.locale("de_DE")
 
@@ -97,13 +87,13 @@ PanelWindow {
             clip: true
             focus: true
             border.width: 1
-            border.color: pop.barBorder
+            border.color: Theme.border
             implicitHeight: column.implicitHeight + 28 * pop.s
             height: implicitHeight
 
             gradient: Gradient {
-                GradientStop { position: 0.0; color: pop.barTop }
-                GradientStop { position: 1.0; color: pop.barBot }
+                GradientStop { position: 0.0; color: Theme.cardTop }
+                GradientStop { position: 1.0; color: Theme.cardBot }
             }
 
             Keys.onEscapePressed: pop.open = false
@@ -118,7 +108,7 @@ PanelWindow {
                 anchors.leftMargin: 12
                 anchors.rightMargin: 12
                 height: 1
-                color: pop.sheen
+                color: Theme.sheen
             }
 
             Column {
@@ -136,8 +126,8 @@ PanelWindow {
                         anchors.verticalCenter: parent.verticalCenter
                         text: pop.deLocale.standaloneMonthName(pop.viewMonth, Locale.LongFormat)
                             + " " + pop.viewYear
-                        color: pop.cream
-                        font.family: "Inter"
+                        color: Theme.cream
+                        font.family: Theme.font
                         font.pixelSize: 13 * pop.s
                         font.weight: Font.DemiBold
                     }
@@ -156,13 +146,13 @@ PanelWindow {
                                 width: 22 * pop.s
                                 height: 22 * pop.s
                                 radius: 6
-                                color: navArea.containsMouse ? pop.slotBg : "transparent"
+                                color: navArea.containsMouse ? Theme.slotBg : "transparent"
 
                                 Text {
                                     anchors.centerIn: parent
                                     text: nav.modelData < 0 ? "‹" : "›"
-                                    color: pop.vermLit
-                                    font.family: "Inter"
+                                    color: Theme.vermLit
+                                    font.family: Theme.font
                                     font.pixelSize: 15 * pop.s
                                     font.weight: Font.DemiBold
                                 }
@@ -195,8 +185,8 @@ PanelWindow {
                             Text {
                                 anchors.centerIn: parent
                                 text: pop.deLocale.standaloneDayName((wd.index + 1) % 7, Locale.NarrowFormat)
-                                color: pop.dim
-                                font.family: "Inter"
+                                color: Theme.dim
+                                font.family: Theme.font
                                 font.pixelSize: 9 * pop.s
                                 font.weight: Font.Medium
                                 font.letterSpacing: 0.5 * pop.s
@@ -208,7 +198,7 @@ PanelWindow {
                 Rectangle {
                     width: parent.width
                     height: 1
-                    color: pop.hair
+                    color: Theme.hair
                 }
 
                 Grid {
@@ -239,8 +229,8 @@ PanelWindow {
                                 visible: cell.current
 
                                 gradient: Gradient {
-                                    GradientStop { position: 0.0; color: pop.vermLit }
-                                    GradientStop { position: 1.0; color: pop.vermDeep }
+                                    GradientStop { position: 0.0; color: Theme.vermLit }
+                                    GradientStop { position: 1.0; color: Theme.vermDeep }
                                 }
                             }
 
@@ -248,8 +238,8 @@ PanelWindow {
                                 anchors.centerIn: parent
                                 visible: cell.inMonth
                                 text: cell.dayNum
-                                color: cell.current ? "#fff6f0" : pop.cream
-                                font.family: "Inter"
+                                color: cell.current ? Theme.bright : Theme.cream
+                                font.family: Theme.font
                                 font.pixelSize: 11 * pop.s
                                 font.weight: cell.current ? Font.DemiBold : Font.Normal
                                 font.features: { "tnum": 1 }
