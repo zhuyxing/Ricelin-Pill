@@ -79,8 +79,9 @@ Item {
     ShaderEffect {
         anchors.fill: parent
         property var source: blurVSrc
-        property color accent: palette.accent
-        property real intensity: Theme.gradeIntensity
+        property color accent: palette.hasArt ? palette.accent : Qt.rgba(0.5, 0.5, 0.5, 1.0)
+        property real tint: 0.35
+        property real darken: 0.62
         fragmentShader: "shaders/grade.frag.qsb"
     }
 

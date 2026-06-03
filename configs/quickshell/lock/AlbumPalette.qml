@@ -8,6 +8,7 @@ Item {
 
     property string artUrl: ""
     property color accent: Theme.accent
+    property bool hasArt: false
 
     readonly property string artPath: {
         var u = artUrl;
@@ -21,10 +22,12 @@ Item {
     }
 
     onArtPathChanged: {
-        if (artPath.length === 0)
+        if (artPath.length === 0) {
             accent = Theme.accent;
-        else
+            hasArt = false;
+        } else {
             extract.start(artPath);
+        }
     }
 
     Process {
@@ -41,6 +44,7 @@ Item {
                 var hex = this.text.trim();
                 var c = Pal.clampHex(hex);
                 palette.accent = c ? c : Theme.accent;
+                palette.hasArt = c ? true : false;
             }
         }
     }
