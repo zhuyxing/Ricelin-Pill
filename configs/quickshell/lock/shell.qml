@@ -27,6 +27,7 @@ ShellRoot {
             LockSurface {
                 anchors.fill: parent
                 s: lockSurface.screen ? lockSurface.screen.height / 1080 : 1
+                screenName: lockSurface.screen ? lockSurface.screen.name : ""
                 auth: auth
             }
         }

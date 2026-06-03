@@ -12,7 +12,7 @@ Item {
     property var barWindow
 
     readonly property var actions: [
-        { label: "Lock", argv: ["qs", "-c", "lock", "ipc", "call", "lock", "lock"] },
+        { label: "Lock", argv: ["sh", "-c", "$HOME/.config/hypr/scripts/lock.sh"] },
         { label: "Logout", dispatch: "hl.dsp.exit()" },
         { label: "Reboot", argv: ["systemctl", "reboot"] },
         { label: "Shutdown", argv: ["systemctl", "poweroff"] }

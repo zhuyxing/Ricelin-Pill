@@ -5,13 +5,14 @@ Item {
     id: surface
     property real s: 1
     property var auth: null
+    property string screenName: ""
 
     clip: true
 
     Image {
         id: bgImg
         anchors.fill: parent
-        source: "file:///tmp/lock-dev-sharp.jpg"
+        source: surface.screenName.length > 0 ? "file:///tmp/ricelin-lock-" + surface.screenName + ".png" : "file:///tmp/lock-dev-sharp.jpg"
         fillMode: Image.PreserveAspectCrop
         smooth: true
         mipmap: true
