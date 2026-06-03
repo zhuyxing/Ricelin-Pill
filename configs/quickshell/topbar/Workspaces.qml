@@ -26,17 +26,41 @@ Item {
         return "";
     }
 
+    function iconFromName(str) {
+        if (!str)
+            return "";
+        var e = DesktopEntries.heuristicLookup(str);
+        if (e && e.icon) {
+            var p = Quickshell.iconPath(e.icon, true);
+            if (p)
+                return p;
+        }
+        return Quickshell.iconPath(str.toLowerCase(), true);
+    }
+
+    function firstWord(s) {
+        if (!s)
+            return "";
+        var parts = s.split(/[\s—|:()-]+/);
+        return parts.length ? parts[0] : "";
+    }
+
+    function iconForWindow(o) {
+        if (!o)
+            return "";
+        return iconFromName(o.class)
+            || iconFromName(o.initialClass)
+            || iconFromName(firstWord(o.title))
+            || iconFromName(firstWord(o.initialTitle));
+    }
+
     function iconFor(name) {
         var t = Hyprland.toplevels.values;
         for (var i = 0; i < t.length; i++) {
             var w = t[i].workspace;
             if (!w || w.name !== name)
                 continue;
-            var cls = t[i].lastIpcObject ? t[i].lastIpcObject.class : "";
-            if (!cls)
-                continue;
-            var e = DesktopEntries.heuristicLookup(cls);
-            var ic = e && e.icon ? Quickshell.iconPath(e.icon, true) : "";
+            var ic = iconForWindow(t[i].lastIpcObject);
             if (ic)
                 return ic;
         }
