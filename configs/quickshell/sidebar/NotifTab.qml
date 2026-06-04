@@ -72,7 +72,7 @@ Column {
         s: root.s
         width: parent.width
         Text {
-            text: "Nichts Neues"
+            text: "Nothing new"
             color: Theme.faint
             font.family: Theme.font
             font.pixelSize: 12 * root.s

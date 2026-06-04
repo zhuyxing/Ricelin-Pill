@@ -9,14 +9,14 @@ Rectangle {
     required property var notif
     property real s: 1
 
-    radius: 13 * s
+    radius: 15 * s
     border.width: 1
     border.color: notif.urgency === NotificationUrgency.Critical ? Theme.vermLit : Theme.border
     gradient: Gradient {
         GradientStop { position: 0.0; color: Theme.panelTop }
         GradientStop { position: 1.0; color: Theme.panelBot }
     }
-    implicitHeight: body.implicitHeight + 22 * s
+    implicitHeight: body.implicitHeight + 28 * s
 
     Timer {
         interval: toast.notif.urgency === NotificationUrgency.Low ? 4000 : 6000
@@ -29,13 +29,13 @@ Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
-        anchors.margins: 11 * toast.s
-        spacing: 10 * toast.s
+        anchors.margins: 14 * toast.s
+        spacing: 12 * toast.s
 
         Rectangle {
-            width: 30 * toast.s
-            height: 30 * toast.s
-            radius: 9 * toast.s
+            width: 40 * toast.s
+            height: 40 * toast.s
+            radius: 12 * toast.s
             color: Theme.tileBg
             border.width: 1
             border.color: Theme.border
@@ -43,7 +43,7 @@ Rectangle {
             Image {
                 id: toastImg
                 anchors.fill: parent
-                anchors.margins: toast.notif.image ? 0 : 6 * toast.s
+                anchors.margins: toast.notif.image ? 0 : 8 * toast.s
                 source: toast.notif.image
                     ? toast.notif.image
                     : (toast.notif.appIcon ? Quickshell.iconPath(toast.notif.appIcon, "") : "")
@@ -57,17 +57,17 @@ Rectangle {
             Rectangle {
                 anchors.centerIn: parent
                 visible: !toastImg.visible
-                width: 8 * toast.s
-                height: 8 * toast.s
-                radius: 2 * toast.s
+                width: 11 * toast.s
+                height: 11 * toast.s
+                radius: 3 * toast.s
                 rotation: 45
                 color: Theme.verm
             }
         }
 
         Column {
-            width: parent.width - 40 * toast.s
-            spacing: 2 * toast.s
+            width: parent.width - 52 * toast.s
+            spacing: 3 * toast.s
 
             Item {
                 width: parent.width
@@ -75,11 +75,11 @@ Rectangle {
 
                 Text {
                     id: tTitle
-                    width: parent.width - 20 * toast.s
+                    width: parent.width - 24 * toast.s
                     text: toast.notif.summary
                     color: Theme.cream
                     font.family: Theme.font
-                    font.pixelSize: 12.5 * toast.s
+                    font.pixelSize: 14.5 * toast.s
                     font.weight: Font.DemiBold
                     elide: Text.ElideRight
                 }
@@ -88,7 +88,7 @@ Rectangle {
                     anchors.right: parent.right
                     text: "✕"
                     color: Theme.faint
-                    font.pixelSize: 11 * toast.s
+                    font.pixelSize: 13 * toast.s
 
                     MouseArea {
                         anchors.fill: parent
@@ -105,17 +105,17 @@ Rectangle {
                 text: toast.notif.body
                 color: Theme.dim
                 font.family: Theme.font
-                font.pixelSize: 11.5 * toast.s
+                font.pixelSize: 13 * toast.s
                 wrapMode: Text.Wrap
-                maximumLineCount: 2
+                maximumLineCount: 3
                 elide: Text.ElideRight
                 textFormat: Text.PlainText
             }
 
             Row {
                 visible: toast.notif.actions.length > 0
-                spacing: 7 * toast.s
-                topPadding: 5 * toast.s
+                spacing: 8 * toast.s
+                topPadding: 7 * toast.s
 
                 Repeater {
                     model: toast.notif.actions
@@ -129,8 +129,8 @@ Rectangle {
                         color: Theme.tileBg
                         border.width: 1
                         border.color: actPill.index === 0 ? Theme.accent45 : Theme.border
-                        implicitHeight: 22 * toast.s
-                        implicitWidth: actText.implicitWidth + 22 * toast.s
+                        implicitHeight: 26 * toast.s
+                        implicitWidth: actText.implicitWidth + 26 * toast.s
 
                         Text {
                             id: actText
@@ -138,7 +138,7 @@ Rectangle {
                             text: actPill.modelData.text
                             color: actPill.index === 0 ? Theme.vermLit : Theme.dim
                             font.family: Theme.font
-                            font.pixelSize: 10 * toast.s
+                            font.pixelSize: 11 * toast.s
                             font.weight: Font.DemiBold
                         }
 

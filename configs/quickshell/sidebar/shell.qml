@@ -123,13 +123,13 @@ ShellRoot {
             anchors { top: true; right: true }
             margins { top: 52 * popupWin.screenScale; right: 12 * popupWin.screenScale }
 
-            implicitWidth: 340 * s
+            implicitWidth: 420 * s
             implicitHeight: toastCol.implicitHeight
 
             Column {
                 id: toastCol
                 width: parent.width
-                spacing: 8 * popupWin.s
+                spacing: 10 * popupWin.s
 
                 Repeater {
                     model: Notifs.popups
