@@ -101,4 +101,47 @@ ShellRoot {
             }
         }
     }
+
+    Variants {
+        model: Quickshell.screens
+
+        PanelWindow {
+            id: popupWin
+            required property var modelData
+            readonly property real s: modelData ? Math.min(modelData.height / 1080, 1.0) : 1
+            readonly property real screenScale: modelData ? modelData.height / 1080 : 1
+
+            screen: modelData
+            visible: Notifs.popups.length > 0 && !root.shown
+            color: "transparent"
+
+            exclusionMode: ExclusionMode.Ignore
+            WlrLayershell.layer: WlrLayer.Overlay
+            WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
+            WlrLayershell.namespace: "notif-popups"
+
+            anchors { top: true; right: true }
+            margins { top: 52 * popupWin.screenScale; right: 12 * popupWin.screenScale }
+
+            implicitWidth: 340 * s
+            implicitHeight: toastCol.implicitHeight
+
+            Column {
+                id: toastCol
+                width: parent.width
+                spacing: 8 * popupWin.s
+
+                Repeater {
+                    model: Notifs.popups
+
+                    NotifPopup {
+                        required property var modelData
+                        width: parent.width
+                        s: popupWin.s
+                        notif: modelData
+                    }
+                }
+            }
+        }
+    }
 }
