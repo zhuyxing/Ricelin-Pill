@@ -18,8 +18,8 @@ Item {
 
     property string screenName: ""
     property real s: 1
-    property real dotActive: 8 * s
-    property real dotIdle: 6 * s
+    property real stickW: 17 * s
+    property real dotW: 5 * s
     property real gap: 4 * s
 
     readonly property var range: {
@@ -56,19 +56,18 @@ Item {
                 readonly property string wsName: String(modelData)
                 readonly property bool isActive: workspaces.activeName === wsName
 
-                Layout.preferredWidth: slot.isActive ? (17 * workspaces.s) : (5 * workspaces.s)
-                Layout.preferredHeight: Math.max(22 * workspaces.s, 5 * workspaces.s)
+                Layout.preferredWidth: slot.isActive ? workspaces.stickW : workspaces.dotW
+                Layout.preferredHeight: 22 * workspaces.s
                 Behavior on Layout.preferredWidth { NumberAnimation { duration: Motion.fast; easing.type: Motion.easeStandard } }
 
                 Rectangle {
                     anchors.centerIn: parent
-                    width: slot.isActive ? (17 * workspaces.s) : (5 * workspaces.s)
-                    height: 5 * workspaces.s
+                    width: parent.width
+                    height: workspaces.dotW
                     radius: height / 2
                     color: slot.isActive ? Theme.vermLit : Theme.cream
                     opacity: slot.isActive ? 1.0 : (area.containsMouse ? 0.7 : 0.3)
-                    Behavior on width { NumberAnimation { duration: Motion.fast; easing.type: Motion.easeStandard } }
-                    Behavior on opacity { NumberAnimation { duration: 120 } }
+                    Behavior on opacity { NumberAnimation { duration: Motion.fast } }
                 }
 
                 MouseArea {
