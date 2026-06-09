@@ -297,19 +297,12 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
                 visible: Cava.active
                 width: visible ? vis.implicitWidth : 0
-                height: 20 * pill.s
+                height: 16 * pill.s
 
                 VisualizerBars {
                     id: vis
                     anchors.centerIn: parent
                     s: pill.s
-                }
-
-                MouseArea {
-                    anchors.fill: parent
-                    anchors.margins: -4 * pill.s
-                    cursorShape: Qt.PointingHandCursor
-                    onClicked: pill.requestSurface("media")
                 }
             }
         }
@@ -518,6 +511,30 @@ Item {
                         enabled: hover.live
                         cursorShape: Qt.PointingHandCursor
                         onClicked: pill.requestSurface("mixer")
+                    }
+                }
+
+                Item {
+                    id: mediaBtn
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: pill.hasMedia
+                    width: visible ? hvis.implicitWidth : 0
+                    height: 18 * pill.s
+
+                    VisualizerBars {
+                        id: hvis
+                        anchors.centerIn: parent
+                        s: pill.s
+                        maxH: 13 * pill.s
+                    }
+
+                    MouseArea {
+                        anchors.fill: parent
+                        anchors.margins: -6 * pill.s
+                        hoverEnabled: true
+                        enabled: hover.live
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: pill.requestSurface("media")
                     }
                 }
 

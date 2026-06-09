@@ -10,10 +10,10 @@ Row {
     id: root
 
     property real s: 1
-    property real maxH: 16 * s
-    property real minH: 2.5 * s
+    property real maxH: 11 * s
+    property real minH: 2 * s
 
-    spacing: 2.2 * s
+    spacing: 2 * s
 
     Repeater {
         model: Cava.bars

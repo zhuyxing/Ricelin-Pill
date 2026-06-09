@@ -13,7 +13,7 @@ import Quickshell.Services.Mpris
 Singleton {
     id: root
 
-    readonly property int bars: 11
+    readonly property int bars: 9
     property var values: []
 
     readonly property bool active: {
