@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Effects
 import Quickshell
 import Quickshell.Io
 import Quickshell.Services.Pipewire
@@ -28,6 +27,8 @@ Item {
     property int focusIndex: -1
     readonly property var faders: [brFader, vibFader, volFader, micFader]
 
+    onActiveChanged: if (!active) focusIndex = -1;
+
     /**
      * Resolve the fader that input should target: the hovered fader takes priority,
      * else the keyboard-focused one. Returns null when nothing is targeted.
@@ -47,8 +48,7 @@ Item {
         const f = focusedFader();
         if (!f)
             return false;
-        if (focusIndex < 0)
-            focusIndex = faders.indexOf(f);
+        focusIndex = faders.indexOf(f);
         f.step(deltaPct);
         return true;
     }
@@ -60,14 +60,6 @@ Item {
     function moveFocus(dir) {
         focusIndex = focusIndex < 0 ? (dir > 0 ? 0 : faders.length - 1)
                                     : (focusIndex + dir + faders.length) % faders.length;
-    }
-
-    /**
-     * Nudge whichever fader is targeted by `deltaPct` percent. Returns true when a
-     * fader handled the step, false otherwise.
-     */
-    function stepHovered(deltaPct) {
-        return stepFocused(deltaPct);
     }
 
     function applyBrightness(pct) {
@@ -284,9 +276,14 @@ Item {
     }
 
     WheelHandler {
+        property real acc: 0
         onWheel: (event) => {
-            if (root.stepFocused(event.angleDelta.y > 0 ? 3 : -3))
+            acc += event.angleDelta.y / 120;
+            const notches = Math.trunc(acc);
+            if (notches !== 0 && root.stepFocused(notches * 3)) {
+                acc -= notches;
                 event.accepted = true;
+            }
         }
     }
 }

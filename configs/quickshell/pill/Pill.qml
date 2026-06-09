@@ -73,7 +73,7 @@ Item {
      * when the mixer is open and a fader consumed the step.
      */
     function mixerStep(deltaPct) {
-        return pill.mixerOpen ? mixer.stepHovered(deltaPct) : false;
+        return pill.mixerOpen ? mixer.stepFocused(deltaPct) : false;
     }
 
     /**
