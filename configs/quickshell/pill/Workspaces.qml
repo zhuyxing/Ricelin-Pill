@@ -18,6 +18,9 @@ Item {
 
     property string screenName: ""
     property real s: 1
+    property real dotActive: 8 * s
+    property real dotIdle: 6 * s
+    property real gap: 4 * s
 
     readonly property var range: {
         if (screenName === "DP-1") return [1, 2, 3, 4, 5];
@@ -40,7 +43,7 @@ Item {
         id: row
         anchors.left: parent.left
         anchors.verticalCenter: parent.verticalCenter
-        spacing: 4 * workspaces.s
+        spacing: workspaces.gap
 
         Repeater {
             model: workspaces.range
@@ -53,12 +56,12 @@ Item {
                 readonly property string wsName: String(modelData)
                 readonly property bool isActive: workspaces.activeName === wsName
 
-                Layout.preferredWidth: 14 * workspaces.s
-                Layout.preferredHeight: 22 * workspaces.s
+                Layout.preferredWidth: workspaces.dotActive
+                Layout.preferredHeight: Math.max(22 * workspaces.s, workspaces.dotActive)
 
                 Rectangle {
                     anchors.centerIn: parent
-                    width: (slot.isActive ? 8 : 6) * workspaces.s
+                    width: slot.isActive ? workspaces.dotActive : workspaces.dotIdle
                     height: width
                     radius: width / 2
                     color: slot.isActive ? Theme.vermLit : Theme.cream

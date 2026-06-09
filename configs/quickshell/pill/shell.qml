@@ -28,6 +28,7 @@ ShellRoot {
 
     property string openMon: ""
     property string openSurface: ""
+    property string peekMon: ""
 
     function refresh() {
         Hyprland.refreshMonitors();
@@ -55,10 +56,15 @@ ShellRoot {
         root.openSurface = "";
     }
 
+    function peek(mon) {
+        root.peekMon = root.peekMon === mon ? "" : mon;
+    }
+
     IpcHandler {
         target: "pill"
         function mixer(mon: string): void { root.toggleSurface(mon, "mixer"); }
         function calendar(mon: string): void { root.toggleSurface(mon, "calendar"); }
+        function peek(mon: string): void { root.peek(mon); }
         function hide(): void { root.close(); }
     }
 
@@ -96,7 +102,7 @@ ShellRoot {
             readonly property real topGap: 8 * s
             readonly property string surface: root.openMon === modelData.name ? root.openSurface : ""
             readonly property bool surfaceOpen: surface.length > 0
-            readonly property bool modal: surfaceOpen || pill.pinned
+            readonly property bool modal: surfaceOpen || pill.held
             property bool kbReady: false
 
             screen: modelData
@@ -123,7 +129,10 @@ ShellRoot {
                 acceptedButtons: Qt.AllButtons
                 onPressed: {
                     if (overlay.surfaceOpen) root.close();
-                    else pill.pinned = false;
+                    else {
+                        pill.pinned = false;
+                        root.peekMon = "";
+                    }
                 }
             }
 
@@ -144,6 +153,7 @@ ShellRoot {
                     screenName: overlay.modelData.name
                     barWindow: overlay
                     surface: overlay.surface
+                    forcePinned: root.peekMon === overlay.modelData.name
 
                     onRequestSurface: (name) => root.toggleSurface(overlay.modelData.name, name)
                     onRequestClose: root.close()

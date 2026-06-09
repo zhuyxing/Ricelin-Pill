@@ -28,17 +28,19 @@ Item {
 
     property bool hovered: false
     property bool pinned: false
+    property bool forcePinned: false
 
+    readonly property bool held: pinned || forcePinned
     readonly property bool mixerOpen: surface === "mixer"
     readonly property bool calendarOpen: surface === "calendar"
     readonly property bool surfaceOpen: surface.length > 0
-    readonly property bool expanded: surfaceOpen || pinned || hovered
+    readonly property bool expanded: surfaceOpen || held || hovered
 
     readonly property real restW: 160 * s
     readonly property real restH: 38 * s
-    readonly property real hoverSide: Math.max(ws.implicitWidth, statusRow.implicitWidth)
-    readonly property real hoverW: 2 * hoverSide + hoverClock.implicitWidth + 56 * s
-    readonly property real hoverH: 46 * s
+    readonly property real hoverPad: 18 * s
+    readonly property real hoverW: hoverRow.implicitWidth + 2 * hoverPad
+    readonly property real hoverH: 50 * s
     readonly property real mixerW: 372 * s
     readonly property real mixerH: 206 * s
     readonly property real calendarW: 318 * s
@@ -217,89 +219,189 @@ Item {
     Item {
         id: hover
         anchors.fill: parent
-        anchors.leftMargin: 20 * pill.s
-        anchors.rightMargin: 20 * pill.s
         opacity: (pill.expanded && !pill.surfaceOpen) ? 1 : 0
         visible: opacity > 0.01
         Behavior on opacity { NumberAnimation { duration: 150 } }
 
-        Workspaces {
-            id: ws
-            anchors.left: parent.left
-            anchors.verticalCenter: parent.verticalCenter
-            screenName: pill.screenName
-            s: pill.s
-            enabled: pill.expanded && !pill.surfaceOpen
-        }
-
-        Column {
-            id: hoverClock
-            anchors.centerIn: parent
-            spacing: 1 * pill.s
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: clock.hhmm
-                color: Theme.cream
-                font.family: Theme.font
-                font.pixelSize: 20 * pill.s
-                font.weight: Font.DemiBold
-                font.features: { "tnum": 1 }
-            }
-            Text {
-                anchors.horizontalCenter: parent.horizontalCenter
-                text: clock.date
-                color: Theme.dim
-                font.family: Theme.font
-                font.pixelSize: 9.5 * pill.s
-                font.weight: Font.Medium
-                font.capitalization: Font.AllUppercase
-                font.letterSpacing: 1.2 * pill.s
-            }
-        }
-
-        MouseArea {
-            anchors.centerIn: hoverClock
-            width: hoverClock.width + 22 * pill.s
-            height: hoverClock.height + 10 * pill.s
-            enabled: pill.expanded && !pill.surfaceOpen
-            cursorShape: Qt.PointingHandCursor
-            onClicked: pill.requestSurface("calendar")
-        }
+        readonly property bool live: pill.expanded && !pill.surfaceOpen
 
         Row {
-            id: statusRow
-            anchors.right: parent.right
-            anchors.verticalCenter: parent.verticalCenter
-            spacing: 11 * pill.s
+            id: hoverRow
+            anchors.centerIn: parent
+            spacing: 15 * pill.s
 
-            Tray {
+            Workspaces {
+                id: ws
                 anchors.verticalCenter: parent.verticalCenter
+                width: implicitWidth
+                screenName: pill.screenName
                 s: pill.s
-                barWindow: pill.barWindow
-                enabled: pill.expanded && !pill.surfaceOpen
+                dotActive: 9 * pill.s
+                dotIdle: 6 * pill.s
+                gap: 9 * pill.s
+                enabled: hover.live
             }
 
-            Text {
+            Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
-                text: Store.dnd ? "静" : "音"
-                color: Store.dnd ? Theme.vermLit : Theme.faint
-                font.family: Theme.font
-                font.pixelSize: 13 * pill.s
+                width: 1
+                height: 16 * pill.s
+                color: Theme.hair
+                opacity: 0.7
             }
 
-            Text {
+            Item {
                 anchors.verticalCenter: parent.verticalCenter
-                text: "調"
-                color: Theme.faint
-                font.family: Theme.font
-                font.pixelSize: 13 * pill.s
+                width: hoverClock.implicitWidth
+                height: hoverClock.implicitHeight
+
+                Column {
+                    id: hoverClock
+                    anchors.centerIn: parent
+                    spacing: 1 * pill.s
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: clock.hhmm
+                        color: Theme.cream
+                        font.family: Theme.font
+                        font.pixelSize: 22 * pill.s
+                        font.weight: Font.DemiBold
+                        font.features: { "tnum": 1 }
+                    }
+                    Text {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: clock.date
+                        color: Theme.dim
+                        font.family: Theme.font
+                        font.pixelSize: 9.5 * pill.s
+                        font.weight: Font.Medium
+                        font.capitalization: Font.AllUppercase
+                        font.letterSpacing: 1.2 * pill.s
+                    }
+                }
 
                 MouseArea {
-                    anchors.fill: parent
-                    anchors.margins: -6 * pill.s
-                    enabled: pill.expanded && !pill.surfaceOpen
+                    anchors.centerIn: parent
+                    width: hoverClock.implicitWidth + 22 * pill.s
+                    height: hoverClock.implicitHeight + 10 * pill.s
+                    enabled: hover.live
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: pill.requestSurface("mixer")
+                    onClicked: pill.requestSurface("calendar")
+                }
+            }
+
+            Rectangle {
+                anchors.verticalCenter: parent.verticalCenter
+                width: 1
+                height: 16 * pill.s
+                color: Theme.hair
+                opacity: 0.7
+            }
+
+            Row {
+                id: statusRow
+                anchors.verticalCenter: parent.verticalCenter
+                spacing: 12 * pill.s
+
+                Tray {
+                    anchors.verticalCenter: parent.verticalCenter
+                    s: pill.s
+                    barWindow: pill.barWindow
+                    enabled: hover.live
+                }
+
+                Shape {
+                    id: dndIcon
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: Store.dnd
+                    width: 16 * pill.s
+                    height: 16 * pill.s
+                    preferredRendererType: Shape.CurveRenderer
+
+                    ShapePath {
+                        strokeColor: Theme.vermLit
+                        strokeWidth: 1.5 * pill.s
+                        fillColor: "transparent"
+                        capStyle: ShapePath.RoundCap
+                        joinStyle: ShapePath.RoundJoin
+                        startX: 5.2 * pill.s; startY: 12.2 * pill.s
+                        PathLine { x: 12.2 * pill.s; y: 12.2 * pill.s }
+                        PathLine { x: 12.2 * pill.s; y: 7.2 * pill.s }
+                        PathCubic {
+                            control1X: 12.2 * pill.s; control1Y: 5.4 * pill.s
+                            control2X: 11.2 * pill.s; control2Y: 4.0 * pill.s
+                            x: 9.5 * pill.s; y: 3.5 * pill.s
+                        }
+                    }
+                    ShapePath {
+                        strokeColor: Theme.vermLit
+                        strokeWidth: 1.5 * pill.s
+                        fillColor: "transparent"
+                        capStyle: ShapePath.RoundCap
+                        startX: 6.8 * pill.s; startY: 13.6 * pill.s
+                        PathLine { x: 9.2 * pill.s; y: 13.6 * pill.s }
+                    }
+                    ShapePath {
+                        strokeColor: Theme.vermLit
+                        strokeWidth: 1.6 * pill.s
+                        fillColor: "transparent"
+                        capStyle: ShapePath.RoundCap
+                        startX: 3.2 * pill.s; startY: 2.8 * pill.s
+                        PathLine { x: 13.0 * pill.s; y: 13.4 * pill.s }
+                    }
+                }
+
+                Item {
+                    id: mixerIcon
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 16 * pill.s
+                    height: 16 * pill.s
+
+                    readonly property color stroke: mixerArea.containsMouse ? Theme.vermLit : Theme.faint
+
+                    Repeater {
+                        model: [
+                            { x: 4, knob: 5 },
+                            { x: 8, knob: 10 },
+                            { x: 12, knob: 6 }
+                        ]
+                        delegate: Shape {
+                            id: fader
+                            required property var modelData
+                            anchors.fill: parent
+                            preferredRendererType: Shape.CurveRenderer
+
+                            ShapePath {
+                                strokeColor: mixerIcon.stroke
+                                strokeWidth: 1.6 * pill.s
+                                fillColor: "transparent"
+                                capStyle: ShapePath.RoundCap
+                                startX: fader.modelData.x * pill.s
+                                startY: 2.5 * pill.s
+                                PathLine { x: fader.modelData.x * pill.s; y: 13.5 * pill.s }
+                            }
+                            ShapePath {
+                                strokeColor: mixerIcon.stroke
+                                strokeWidth: 1.6 * pill.s
+                                fillColor: Theme.cardBot
+                                joinStyle: ShapePath.RoundJoin
+                                startX: (fader.modelData.x - 1.7) * pill.s
+                                startY: fader.modelData.knob * pill.s
+                                PathArc { x: (fader.modelData.x + 1.7) * pill.s; y: fader.modelData.knob * pill.s; radiusX: 1.7 * pill.s; radiusY: 1.7 * pill.s }
+                                PathArc { x: (fader.modelData.x - 1.7) * pill.s; y: fader.modelData.knob * pill.s; radiusX: 1.7 * pill.s; radiusY: 1.7 * pill.s }
+                            }
+                        }
+                    }
+
+                    MouseArea {
+                        id: mixerArea
+                        anchors.fill: parent
+                        anchors.margins: -6 * pill.s
+                        hoverEnabled: true
+                        enabled: hover.live
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: pill.requestSurface("mixer")
+                    }
                 }
             }
         }
