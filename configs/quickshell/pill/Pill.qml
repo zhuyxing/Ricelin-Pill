@@ -33,6 +33,7 @@ Item {
     readonly property bool held: pinned || forcePinned
     readonly property bool mixerOpen: surface === "mixer"
     readonly property bool calendarOpen: surface === "calendar"
+    readonly property bool launcherOpen: surface === "launcher"
     readonly property bool surfaceOpen: surface.length > 0
     readonly property bool expanded: surfaceOpen || held || hovered
 
@@ -45,11 +46,14 @@ Item {
     readonly property real mixerH: 206 * s
     readonly property real calendarW: 318 * s
     readonly property real calendarH: 262 * s
+    readonly property real launcherW: 360 * s
+    readonly property real launcherH: 366 * s
     readonly property real restCorner: 18 * s
     readonly property real openCorner: 22 * s
 
     readonly property string mode: calendarOpen ? "calendar"
-        : (mixerOpen ? "mixer" : (expanded ? "hover" : "rest"))
+        : (launcherOpen ? "launcher"
+        : (mixerOpen ? "mixer" : (expanded ? "hover" : "rest")))
 
     signal requestSurface(string name)
     signal requestClose()
@@ -89,12 +93,14 @@ Item {
         running: !pill.expanded
     }
 
-    property real morphRadius: (mixerOpen || calendarOpen) ? openCorner : restCorner
+    property real morphRadius: (mixerOpen || calendarOpen || launcherOpen) ? openCorner : restCorner
 
     width: mode === "calendar" ? calendarW
+        : mode === "launcher" ? launcherW
         : mode === "mixer" ? mixerW
         : mode === "hover" ? hoverW : restW
     height: mode === "calendar" ? calendarH
+        : mode === "launcher" ? launcherH
         : mode === "mixer" ? mixerH
         : mode === "hover" ? hoverH : restH
 
@@ -440,7 +446,7 @@ Item {
                         hoverEnabled: true
                         enabled: hover.live
                         cursorShape: Qt.PointingHandCursor
-                        onClicked: Quickshell.execDetached(["qs", "-c", "launcher", "ipc", "call", "launcher", "toggle", pill.screenName])
+                        onClicked: pill.requestSurface("launcher")
                     }
                 }
 
@@ -530,5 +536,22 @@ Item {
         Behavior on opacity {
             NumberAnimation { duration: 260; easing.type: Easing.OutCubic }
         }
+    }
+
+    Launcher {
+        id: launcher
+        anchors.fill: parent
+        anchors.topMargin: 15 * pill.s
+        anchors.leftMargin: 17 * pill.s
+        anchors.rightMargin: 17 * pill.s
+        anchors.bottomMargin: 14 * pill.s
+        s: pill.s
+        active: pill.launcherOpen
+        enabled: pill.launcherOpen
+        opacity: pill.launcherOpen ? 1 : 0
+        Behavior on opacity {
+            NumberAnimation { duration: 220; easing.type: Easing.OutCubic }
+        }
+        onRequestClose: pill.requestClose()
     }
 }
