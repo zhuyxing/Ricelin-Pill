@@ -62,7 +62,7 @@ Item {
     }
 
     Timer {
-        interval: 1000
+        interval: 500
         running: root.active && root.playing
         repeat: true
         onTriggered: if (root.player) root.player.positionChanged();
@@ -199,29 +199,6 @@ Item {
                 anchors.verticalCenter: parent.verticalCenter
 
                 Rectangle {
-                    id: glow
-                    anchors.centerIn: parent
-                    width: parent.width
-                    height: width
-                    radius: width / 2
-                    color: Theme.vermLit
-                    visible: root.playing
-                    opacity: 0.0
-                    layer.enabled: true
-                    layer.effect: MultiEffect {
-                        blurEnabled: true
-                        blur: 1.0
-                        blurMax: 24
-                    }
-                    SequentialAnimation {
-                        running: root.playing
-                        loops: Animation.Infinite
-                        NumberAnimation { target: glow; property: "opacity"; from: 0.18; to: 0.5; duration: 900; easing.type: Easing.InOutSine }
-                        NumberAnimation { target: glow; property: "opacity"; from: 0.5; to: 0.18; duration: 900; easing.type: Easing.InOutSine }
-                    }
-                }
-
-                Rectangle {
                     anchors.fill: parent
                     radius: width / 2
                     color: ppArea.containsMouse ? Theme.vermLit : Theme.verm
@@ -316,6 +293,7 @@ Item {
                         GradientStop { position: 0.0; color: Theme.verm }
                         GradientStop { position: 1.0; color: Theme.vermLit }
                     }
+                    Behavior on width { NumberAnimation { duration: 500; easing.type: Easing.Linear } }
                 }
                 MouseArea {
                     anchors.fill: parent
