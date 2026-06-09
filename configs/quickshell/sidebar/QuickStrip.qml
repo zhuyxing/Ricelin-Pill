@@ -90,17 +90,17 @@ RowLayout {
     }
 
     Pill {
-        active: Notifs.dnd
+        active: Flags.dnd
         icon: "bell"
         title: "Do Not Disturb"
-        state: Notifs.dnd ? "On" : "Off"
-        onClicked: Notifs.dnd = !Notifs.dnd
+        state: Flags.dnd ? "On" : "Off"
+        onClicked: Flags.dnd = !Flags.dnd
     }
     Pill {
-        active: Store.keepAwake
+        active: Flags.keepAwake
         icon: "eye"
         title: "Keep Awake"
-        state: Store.keepAwake ? "On" : "Off"
-        onClicked: Store.keepAwake = !Store.keepAwake
+        state: Flags.keepAwake ? "On" : "Off"
+        onClicked: Flags.keepAwake = !Flags.keepAwake
     }
 }

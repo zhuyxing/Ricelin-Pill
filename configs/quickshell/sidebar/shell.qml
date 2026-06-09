@@ -28,9 +28,15 @@ ShellRoot {
         }
     }
 
+    Binding {
+        target: Notifs
+        property: "dnd"
+        value: Flags.dnd
+    }
+
     PanelWindow {
         id: inhibitWin
-        visible: Store.keepAwake
+        visible: Flags.keepAwake
         implicitWidth: 1
         implicitHeight: 1
         color: "transparent"
@@ -39,7 +45,7 @@ ShellRoot {
         WlrLayershell.namespace: "sidebar-inhibit"
         WlrLayershell.keyboardFocus: WlrKeyboardFocus.None
         anchors { top: true; left: true }
-        IdleInhibitor { window: inhibitWin; enabled: Store.keepAwake }
+        IdleInhibitor { window: inhibitWin; enabled: Flags.keepAwake }
     }
 
     IpcHandler {

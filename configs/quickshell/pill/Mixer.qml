@@ -178,14 +178,14 @@ Item {
             Chip {
                 glyph: "静"
                 label: "Do Not Disturb"
-                on: Store.dnd
-                onToggled: Store.dnd = !Store.dnd
+                on: Flags.dnd
+                onToggled: Flags.dnd = !Flags.dnd
             }
             Chip {
                 glyph: "覚"
                 label: "Keep Awake"
-                on: Store.keepAwake
-                onToggled: Store.keepAwake = !Store.keepAwake
+                on: Flags.keepAwake
+                onToggled: Flags.keepAwake = !Flags.keepAwake
             }
         }
     }

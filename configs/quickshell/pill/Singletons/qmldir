@@ -1,2 +1,2 @@
 singleton Theme Theme.qml
-singleton Store Store.qml
+singleton Flags Flags.qml

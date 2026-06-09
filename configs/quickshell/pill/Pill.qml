@@ -133,46 +133,69 @@ Item {
         }
     }
 
-    Shape {
+    Item {
         id: comet
         anchors.fill: parent
         anchors.margins: 1
         visible: opacity > 0.01
         opacity: pill.expanded ? 0 : 1
-        preferredRendererType: Shape.CurveRenderer
         Behavior on opacity { NumberAnimation { duration: 180 } }
 
-        readonly property real perim: 2 * (width - 2 * pill.restCorner) + 2 * (height - 2 * pill.restCorner) + 2 * Math.PI * pill.restCorner
-        readonly property real seg: 0.16
-
-        ShapePath {
-            strokeColor: Theme.vermLit
-            strokeWidth: 2 * pill.s
-            fillColor: "transparent"
-            capStyle: ShapePath.RoundCap
-            joinStyle: ShapePath.RoundJoin
-
-            strokeStyle: ShapePath.DashLine
-            dashPattern: [comet.seg * comet.perim / (2 * pill.s), (1 - comet.seg) * comet.perim / (2 * pill.s)]
-            dashOffset: -pill.cometFrac * comet.perim / (2 * pill.s)
-
+        Path {
+            id: ring
             startX: pill.restCorner
-            startY: 1
-            PathLine { x: comet.width - pill.restCorner; y: 1 }
-            PathArc { x: comet.width - 1; y: pill.restCorner; radiusX: pill.restCorner - 1; radiusY: pill.restCorner - 1 }
-            PathLine { x: comet.width - 1; y: comet.height - pill.restCorner }
-            PathArc { x: comet.width - pill.restCorner; y: comet.height - 1; radiusX: pill.restCorner - 1; radiusY: pill.restCorner - 1 }
-            PathLine { x: pill.restCorner; y: comet.height - 1 }
-            PathArc { x: 1; y: comet.height - pill.restCorner; radiusX: pill.restCorner - 1; radiusY: pill.restCorner - 1 }
-            PathLine { x: 1; y: pill.restCorner }
-            PathArc { x: pill.restCorner; y: 1; radiusX: pill.restCorner - 1; radiusY: pill.restCorner - 1 }
+            startY: 0
+            PathLine { x: comet.width - pill.restCorner; y: 0 }
+            PathArc { x: comet.width; y: pill.restCorner; radiusX: pill.restCorner; radiusY: pill.restCorner }
+            PathLine { x: comet.width; y: comet.height - pill.restCorner }
+            PathArc { x: comet.width - pill.restCorner; y: comet.height; radiusX: pill.restCorner; radiusY: pill.restCorner }
+            PathLine { x: pill.restCorner; y: comet.height }
+            PathArc { x: 0; y: comet.height - pill.restCorner; radiusX: pill.restCorner; radiusY: pill.restCorner }
+            PathLine { x: 0; y: pill.restCorner }
+            PathArc { x: pill.restCorner; y: 0; radiusX: pill.restCorner; radiusY: pill.restCorner }
+        }
+
+        Repeater {
+            model: [
+                { behind: 0.000, rad: 2.7, a: 1.00 },
+                { behind: 0.022, rad: 2.4, a: 0.58 },
+                { behind: 0.044, rad: 2.1, a: 0.36 },
+                { behind: 0.066, rad: 1.8, a: 0.21 },
+                { behind: 0.090, rad: 1.5, a: 0.11 },
+                { behind: 0.116, rad: 1.2, a: 0.05 }
+            ]
+
+            delegate: Item {
+                id: spark
+                required property var modelData
+                anchors.fill: parent
+
+                PathInterpolator {
+                    id: along
+                    path: ring
+                    progress: {
+                        var p = pill.cometFrac - spark.modelData.behind;
+                        return p < 0 ? p + 1 : p;
+                    }
+                }
+
+                Rectangle {
+                    width: spark.modelData.rad * 2 * pill.s
+                    height: width
+                    radius: width / 2
+                    antialiasing: true
+                    x: along.x - width / 2
+                    y: along.y - height / 2
+                    color: Qt.rgba(Theme.vermLit.r, Theme.vermLit.g, Theme.vermLit.b, spark.modelData.a)
+                }
+            }
         }
 
         layer.enabled: true
         layer.effect: MultiEffect {
             blurEnabled: true
-            blur: 0.5
-            blurMax: 12
+            blur: 0.45
+            blurMax: 10
         }
     }
 
@@ -313,7 +336,7 @@ Item {
                 Shape {
                     id: dndIcon
                     anchors.verticalCenter: parent.verticalCenter
-                    visible: Store.dnd
+                    visible: Flags.dnd
                     width: 16 * pill.s
                     height: 16 * pill.s
                     preferredRendererType: Shape.CurveRenderer
@@ -348,6 +371,51 @@ Item {
                         capStyle: ShapePath.RoundCap
                         startX: 3.2 * pill.s; startY: 2.8 * pill.s
                         PathLine { x: 13.0 * pill.s; y: 13.4 * pill.s }
+                    }
+                }
+
+                Item {
+                    id: launcherIcon
+                    anchors.verticalCenter: parent.verticalCenter
+                    width: 16 * pill.s
+                    height: 16 * pill.s
+
+                    readonly property color stroke: launcherArea.containsMouse ? Theme.vermLit : Theme.faint
+
+                    Rectangle {
+                        x: 1.5 * pill.s
+                        y: 1.5 * pill.s
+                        width: 9 * pill.s
+                        height: 9 * pill.s
+                        radius: width / 2
+                        color: "transparent"
+                        antialiasing: true
+                        border.width: 1.6 * pill.s
+                        border.color: launcherIcon.stroke
+                    }
+
+                    Shape {
+                        anchors.fill: parent
+                        preferredRendererType: Shape.CurveRenderer
+                        ShapePath {
+                            strokeColor: launcherIcon.stroke
+                            strokeWidth: 1.8 * pill.s
+                            fillColor: "transparent"
+                            capStyle: ShapePath.RoundCap
+                            startX: 9.6 * pill.s
+                            startY: 9.6 * pill.s
+                            PathLine { x: 13.8 * pill.s; y: 13.8 * pill.s }
+                        }
+                    }
+
+                    MouseArea {
+                        id: launcherArea
+                        anchors.fill: parent
+                        anchors.margins: -6 * pill.s
+                        hoverEnabled: true
+                        enabled: hover.live
+                        cursorShape: Qt.PointingHandCursor
+                        onClicked: Quickshell.execDetached(["qs", "-c", "launcher", "ipc", "call", "launcher", "toggle", pill.screenName])
                     }
                 }
 
