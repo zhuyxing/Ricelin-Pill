@@ -1,2 +1,3 @@
 singleton Theme Theme.qml
 singleton Flags Flags.qml
+singleton Cava Cava.qml

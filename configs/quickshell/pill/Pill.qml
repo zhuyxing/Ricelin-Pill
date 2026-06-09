@@ -110,7 +110,8 @@ Item {
         : mode === "power" ? powerW
         : mode === "media" ? mediaW
         : mode === "mixer" ? mixerW
-        : mode === "hover" ? hoverW : restW
+        : mode === "hover" ? hoverW
+        : Math.max(restW, restRow.implicitWidth + 36 * s)
     height: mode === "calendar" ? calendarH
         : mode === "launcher" ? launcherH
         : mode === "power" ? powerH
@@ -263,6 +264,7 @@ Item {
         Behavior on opacity { NumberAnimation { duration: 150 } }
 
         Row {
+            id: restRow
             anchors.centerIn: parent
             spacing: 9 * pill.s
             Text {
@@ -280,6 +282,35 @@ Item {
                 font.pixelSize: 16 * pill.s
                 font.weight: Font.DemiBold
                 font.features: { "tnum": 1 }
+            }
+
+            Rectangle {
+                anchors.verticalCenter: parent.verticalCenter
+                visible: Cava.active
+                width: 1
+                height: 15 * pill.s
+                color: Theme.hair
+                opacity: 0.7
+            }
+
+            Item {
+                anchors.verticalCenter: parent.verticalCenter
+                visible: Cava.active
+                width: visible ? vis.implicitWidth : 0
+                height: 20 * pill.s
+
+                VisualizerBars {
+                    id: vis
+                    anchors.centerIn: parent
+                    s: pill.s
+                }
+
+                MouseArea {
+                    anchors.fill: parent
+                    anchors.margins: -4 * pill.s
+                    cursorShape: Qt.PointingHandCursor
+                    onClicked: pill.requestSurface("media")
+                }
             }
         }
     }
@@ -438,51 +469,6 @@ Item {
                 }
 
                 Item {
-                    id: launcherIcon
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 16 * pill.s
-                    height: 16 * pill.s
-
-                    readonly property color stroke: launcherArea.containsMouse ? Theme.vermLit : Theme.faint
-
-                    Rectangle {
-                        x: 1.5 * pill.s
-                        y: 1.5 * pill.s
-                        width: 9 * pill.s
-                        height: 9 * pill.s
-                        radius: width / 2
-                        color: "transparent"
-                        antialiasing: true
-                        border.width: 1.6 * pill.s
-                        border.color: launcherIcon.stroke
-                    }
-
-                    Shape {
-                        anchors.fill: parent
-                        preferredRendererType: Shape.CurveRenderer
-                        ShapePath {
-                            strokeColor: launcherIcon.stroke
-                            strokeWidth: 1.8 * pill.s
-                            fillColor: "transparent"
-                            capStyle: ShapePath.RoundCap
-                            startX: 9.6 * pill.s
-                            startY: 9.6 * pill.s
-                            PathLine { x: 13.8 * pill.s; y: 13.8 * pill.s }
-                        }
-                    }
-
-                    MouseArea {
-                        id: launcherArea
-                        anchors.fill: parent
-                        anchors.margins: -6 * pill.s
-                        hoverEnabled: true
-                        enabled: hover.live
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: pill.requestSurface("launcher")
-                    }
-                }
-
-                Item {
                     id: mixerIcon
                     anchors.verticalCenter: parent.verticalCenter
                     width: 16 * pill.s
@@ -532,31 +518,6 @@ Item {
                         enabled: hover.live
                         cursorShape: Qt.PointingHandCursor
                         onClicked: pill.requestSurface("mixer")
-                    }
-                }
-
-                Item {
-                    id: musicIcon
-                    anchors.verticalCenter: parent.verticalCenter
-                    visible: pill.hasMedia
-                    width: visible ? 16 * pill.s : 0
-                    height: 16 * pill.s
-
-                    GlyphIcon {
-                        anchors.fill: parent
-                        name: "music"
-                        color: musicArea.containsMouse ? Theme.vermLit : Theme.faint
-                        stroke: 1.7
-                    }
-
-                    MouseArea {
-                        id: musicArea
-                        anchors.fill: parent
-                        anchors.margins: -6 * pill.s
-                        hoverEnabled: true
-                        enabled: hover.live
-                        cursorShape: Qt.PointingHandCursor
-                        onClicked: pill.requestSurface("media")
                     }
                 }
 
