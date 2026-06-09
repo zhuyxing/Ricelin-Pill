@@ -24,6 +24,9 @@ Item {
     property int selectedIndex: 0
     property var usage: ({})
 
+    readonly property real caretX: field.mapToItem(root, field.cursorRectangle.x + field.cursorRectangle.width / 2, 0).x
+    readonly property real caretY: field.mapToItem(root, 0, field.cursorRectangle.y + field.cursorRectangle.height / 2).y
+
     readonly property string usageFile: (Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state")) + "/ricelin/launcher-usage.json"
 
     signal requestClose()
@@ -39,6 +42,21 @@ Item {
     readonly property var results: Fuzzy.rank(allEntries, query, usage)
 
     function focusField() { field.forceActiveFocus(); }
+
+    function mapCategory(raw) {
+        const order = [
+            ["TerminalEmulator", "Terminal"], ["WebBrowser", "Browser"],
+            ["InstantMessaging", "Chat"], ["Audio", "Media"], ["AudioVideo", "Media"],
+            ["Video", "Media"], ["Game", "Game"], ["Development", "Dev"],
+            ["Graphics", "Graphics"], ["Office", "Office"], ["Settings", "System"],
+            ["System", "System"], ["Utility", "Tool"], ["Network", "Net"]
+        ];
+        const cats = String(raw).split(/[;,]/);
+        for (let i = 0; i < order.length; i++)
+            if (cats.includes(order[i][0]))
+                return order[i][1];
+        return "";
+    }
 
     function move(delta) {
         if (results.length === 0)
@@ -126,11 +144,7 @@ Item {
                 root.query = text;
                 root.selectedIndex = 0;
             }
-            cursorDelegate: Rectangle {
-                width: 2 * root.s
-                color: Theme.vermLit
-                visible: field.cursorVisible
-            }
+            cursorDelegate: Item {}
             Keys.onUpPressed: root.move(-1)
             Keys.onDownPressed: root.move(1)
             Keys.onPressed: (e) => {
@@ -192,25 +206,22 @@ Item {
                     return "";
                 if (entry.genericName && entry.genericName.length > 0)
                     return entry.genericName;
-                if (entry.categories && entry.categories.length > 0) {
-                    var first = String(entry.categories).split(";")[0].trim();
-                    if (first.length > 0)
-                        return first;
-                }
+                if (entry.categories && entry.categories.length > 0)
+                    return root.mapCategory(entry.categories);
                 return "";
             }
 
             Rectangle {
                 anchors.fill: parent
-                radius: 10 * root.s
-                visible: appRow.selected
-                gradient: Gradient {
-                    GradientStop { position: 0.0; color: Theme.verm }
-                    GradientStop { position: 1.0; color: Theme.vermDeep }
-                }
+                radius: 9 * root.s
+                visible: appRow.selected || rowArea.containsMouse
+                color: appRow.selected ? Theme.frameBg : Qt.rgba(0.94, 0.88, 0.84, 0.03)
+                border.width: appRow.selected ? 1 : 0
+                border.color: Theme.frameBorder
             }
 
             MouseArea {
+                id: rowArea
                 anchors.fill: parent
                 hoverEnabled: true
                 cursorShape: Qt.PointingHandCursor
@@ -253,7 +264,7 @@ Item {
                     anchors.left: icon.right
                     anchors.leftMargin: 10 * root.s
                     text: appRow.entry ? appRow.entry.name : ""
-                    color: appRow.selected ? Theme.onAccent : Theme.cream
+                    color: Theme.cream
                     font.family: Theme.font
                     font.pixelSize: 13 * root.s
                     font.weight: appRow.selected ? Font.DemiBold : Font.Normal
@@ -265,7 +276,7 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.right: parent.right
                     text: "↵"
-                    color: Theme.onAccent
+                    color: Theme.vermLit
                     font.family: Theme.font
                     font.pixelSize: 12 * root.s
                     visible: appRow.selected
@@ -277,7 +288,7 @@ Item {
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.right: ret.left
                     text: appRow.secondary
-                    color: appRow.selected ? Theme.creamSelected : Theme.faint
+                    color: appRow.selected ? Theme.dim : Theme.faint
                     font.family: Theme.font
                     font.pixelSize: 10.5 * root.s
                     horizontalAlignment: Text.AlignRight

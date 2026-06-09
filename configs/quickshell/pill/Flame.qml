@@ -56,7 +56,7 @@ Item {
     onPillWChanged: if (mode === "held") syncPoint()
     onPillHChanged: if (mode === "held") syncPoint()
 
-    onDockPointChanged: if (mode === "dock") {
+    onDockPointChanged: if (mode === "dock" || mode === "caret") {
         px = dockPoint.x;
         py = dockPoint.y;
     }
@@ -71,7 +71,7 @@ Item {
             flyCtrl = Qt.point((px + flyTarget.x) / 2, Math.min(py, flyTarget.y) - pillH);
             flyT = 0;
             flyAnim.restart();
-        } else if (mode === "dock") {
+        } else if (mode === "dock" || mode === "caret") {
             px = dockPoint.x;
             py = dockPoint.y;
         } else if (mode === "held" || mode === "orbit") {
@@ -147,22 +147,30 @@ Item {
 
     Rectangle {
         id: head
+        readonly property bool caret: root.mode === "caret"
         readonly property real sz: (root.mode === "dock" ? (7 + 2 * root.pulse)
             : ((root.mode === "held" ? 9 : 6) + 3 * root.pulse)) * root.s
-        width: sz
-        height: sz
-        radius: sz / 2
+        width: caret ? 2.5 * root.s : sz
+        height: caret ? 15 * root.s : sz
+        radius: caret ? 1.5 * root.s : sz / 2
         antialiasing: true
-        x: root.px - sz / 2
-        y: root.py - sz / 2
+        x: root.px - width / 2
+        y: root.py - height / 2
         color: Theme.flameCore
         opacity: (root.musicActive || root.mode !== "orbit") ? 1 : 0.45
 
         SequentialAnimation on scale {
-            running: root.visible
+            running: root.visible && root.mode !== "caret"
             loops: Animation.Infinite
             NumberAnimation { from: 0.88; to: 1.06; duration: 700; easing.type: Easing.InOutSine }
             NumberAnimation { from: 1.06; to: 0.88; duration: 700; easing.type: Easing.InOutSine }
+        }
+
+        SequentialAnimation on opacity {
+            running: root.mode === "caret"
+            loops: Animation.Infinite
+            NumberAnimation { from: 1; to: 0.25; duration: 550; easing.type: Easing.InOutSine }
+            NumberAnimation { from: 0.25; to: 1; duration: 550; easing.type: Easing.InOutSine }
         }
     }
 

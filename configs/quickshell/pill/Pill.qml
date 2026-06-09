@@ -41,7 +41,8 @@ Item {
     readonly property bool surfaceOpen: surface.length > 0
     property bool hoverLatch: false
     readonly property bool expanded: surfaceOpen || held || hoverLatch
-    property string mediaFlamePhase: "fly"
+    property string surfaceFlamePhase: "fly"
+    readonly property bool flameSurface: mediaOpen || launcherOpen
 
     readonly property real restW: 160 * s
     readonly property real restH: 38 * s
@@ -163,20 +164,26 @@ Item {
         pulse: Cava.values && Cava.values.length
             ? Cava.values.reduce((a, b) => a + b, 0) / Cava.values.length
             : 0
-        dockPoint: Qt.point(media.x + media.seamHeadX, media.y + media.seamHeadY)
-        flyTarget: Qt.point(media.x + media.seamHeadX, media.y + media.seamHeadY)
-        mode: pill.mediaOpen ? pill.mediaFlamePhase
+        dockPoint: pill.launcherOpen
+            ? Qt.point(launcher.x + launcher.caretX, launcher.y + launcher.caretY)
+            : Qt.point(media.x + media.seamHeadX, media.y + media.seamHeadY)
+        flyTarget: pill.launcherOpen
+            ? Qt.point(launcher.x + launcher.caretX, launcher.y + launcher.caretY)
+            : Qt.point(media.x + media.seamHeadX, media.y + media.seamHeadY)
+        mode: pill.flameSurface ? pill.surfaceFlamePhase
             : (pill.surfaceOpen ? "off"
             : (pill.expanded && musicActive ? "held" : "orbit"))
     }
 
-    onMediaOpenChanged: mediaFlamePhase = "fly"
+    onFlameSurfaceChanged: surfaceFlamePhase = "fly"
 
     Connections {
         target: flame
         function onFlightDone() {
             if (pill.mediaOpen)
-                pill.mediaFlamePhase = "dock";
+                pill.surfaceFlamePhase = "dock";
+            else if (pill.launcherOpen)
+                pill.surfaceFlamePhase = "caret";
         }
     }
 
