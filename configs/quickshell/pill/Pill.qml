@@ -416,8 +416,8 @@ Item {
         anchors.bottomMargin: 12 * pill.s
         s: pill.s
         active: pill.mixerOpen
+        enabled: pill.mixerOpen
         opacity: pill.mixerOpen ? 1 : 0
-        visible: opacity > 0.01
         Behavior on opacity {
             NumberAnimation { duration: 260; easing.type: Easing.OutCubic }
         }
@@ -432,8 +432,8 @@ Item {
         anchors.bottomMargin: 16 * pill.s
         s: pill.s
         active: pill.calendarOpen
+        enabled: pill.calendarOpen
         opacity: pill.calendarOpen ? 1 : 0
-        visible: opacity > 0.01
         Behavior on opacity {
             NumberAnimation { duration: 260; easing.type: Easing.OutCubic }
         }

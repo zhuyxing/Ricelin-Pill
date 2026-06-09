@@ -54,11 +54,10 @@ Item {
         Quickshell.execDetached(["bash", "-c", "mkdir -p \"$(dirname '" + root.stateFile + "')\" && echo " + Math.round(pct) + " > '" + root.stateFile + "'"]);
     }
 
-    onActiveChanged: if (active) brRead.running = true
-
     Component.onCompleted: {
         var v = parseInt((vibState.text() || "40").trim());
         root.vibrance = isNaN(v) ? 40 : v;
+        brRead.running = true;
     }
 
     PwObjectTracker {
