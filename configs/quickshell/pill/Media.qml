@@ -38,8 +38,6 @@ Item {
         return controllable ? controllable : list[0];
     }
 
-    onPlayerChanged: console.log("[diag] Media.player ->",
-        player ? (player.identity || player.dbusName || "unknown") : "none")
 
     readonly property bool hasPlayer: player !== null
     readonly property bool playing: hasPlayer && player.isPlaying

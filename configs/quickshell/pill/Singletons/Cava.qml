@@ -16,7 +16,7 @@ Singleton {
     readonly property int bars: 9
     property var values: []
 
-    readonly property bool active: {
+    readonly property bool rawActive: {
         var l = Mpris.players.values;
         for (var i = 0; i < l.length; i++)
             if (l[i] && l[i].isPlaying)
@@ -24,7 +24,26 @@ Singleton {
         return false;
     }
 
-    onActiveChanged: if (!active) values = [];
+    /**
+     * Playback state with release hysteresis: short audio gaps (seeks, track
+     * changes, brief pauses) keep `active` true so consumers don't flicker
+     * between wake and sleep states.
+     */
+    readonly property bool active: rawActive || holdTimer.running
+
+    onRawActiveChanged: {
+        if (rawActive)
+            holdTimer.stop();
+        else
+            holdTimer.restart();
+    }
+
+    onActiveChanged: if (!active) values = []
+
+    Timer {
+        id: holdTimer
+        interval: 1500
+    }
 
     Process {
         running: root.active
