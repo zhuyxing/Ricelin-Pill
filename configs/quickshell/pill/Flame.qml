@@ -29,6 +29,9 @@ Item {
     property real t: 0.1
     property real px: 0
     property real py: 0
+    property real lapFade: 1
+    property real lapAngle: 0
+    readonly property real lapRadius: 16 * s
     visible: mode !== "off"
 
     function pathPoint(tt) {
@@ -66,6 +69,10 @@ Item {
     property point flyCtrl: Qt.point(0, 0)
 
     onModeChanged: {
+        if (mode !== "lap") {
+            lapFade = 1;
+            lapAnim.stop();
+        }
         if (mode === "fly") {
             flyStart = Qt.point(px, py);
             flyCtrl = Qt.point((px + flyTarget.x) / 2, Math.min(py, flyTarget.y) - pillH);
@@ -74,8 +81,37 @@ Item {
         } else if (mode === "dock" || mode === "caret") {
             px = dockPoint.x;
             py = dockPoint.y;
+        } else if (mode === "lap") {
+            lapAngle = -Math.PI / 2;
+            lapFade = 1;
+            lapAnim.restart();
         } else if (mode === "held" || mode === "orbit") {
             syncPoint();
+        }
+    }
+
+    onLapAngleChanged: if (mode === "lap") {
+        px = dockPoint.x + lapRadius * Math.cos(lapAngle);
+        py = dockPoint.y + lapRadius * Math.sin(lapAngle);
+    }
+
+    SequentialAnimation {
+        id: lapAnim
+        NumberAnimation {
+            target: root
+            property: "lapAngle"
+            from: -Math.PI / 2
+            to: -Math.PI / 2 + 2 * Math.PI
+            duration: 700
+            easing.type: Easing.InOutSine
+        }
+        NumberAnimation {
+            target: root
+            property: "lapFade"
+            from: 1
+            to: 0
+            duration: 400
+            easing.type: Easing.OutCubic
         }
     }
 
@@ -143,6 +179,7 @@ Item {
         x: root.px - sz / 2
         y: root.py - sz / 2
         color: Qt.rgba(Theme.vermLit.r, Theme.vermLit.g, Theme.vermLit.b, 0.3)
+        opacity: root.lapFade
     }
 
     Rectangle {
@@ -157,7 +194,7 @@ Item {
         x: root.px - width / 2
         y: root.py - height / 2
         color: Theme.flameCore
-        opacity: (root.musicActive || root.mode !== "orbit") ? 1 : 0.45
+        opacity: ((root.musicActive || root.mode !== "orbit") ? 1 : 0.45) * root.lapFade
 
         SequentialAnimation on scale {
             running: root.visible && root.mode !== "caret"

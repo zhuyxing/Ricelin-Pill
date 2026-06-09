@@ -34,6 +34,7 @@ Singleton {
     readonly property color flameCore: "#ffd9c2"
     readonly property color flameGlow: "#ff9a64"
     readonly property color todayWarm: "#ffb38a"
+    readonly property color ghost:     "#594636"
     readonly property color frameBg:      Qt.rgba(0.94, 0.88, 0.84, 0.055)
     readonly property color frameBorder:  Qt.rgba(0.94, 0.88, 0.84, 0.10)
     readonly property color creamSelected: Qt.rgba(1, 0.965, 0.941, 0.70)

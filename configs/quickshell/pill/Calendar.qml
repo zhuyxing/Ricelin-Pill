@@ -6,10 +6,12 @@ import "Singletons"
 
 /**
  * Calendar surface content: a header with the month/year label and prev/next
- * navigation, weekday headers and a 6x7 day grid with the live current date
- * carrying the warm accent fill. Mirrors the Mixer's role — it fills the lower
- * body of the morphing pill rather than living in its own window. The view date
- * is reset to the real "today" (via SystemClock) every time the surface opens.
+ * navigation, weekday headers and a day grid sized to exactly the rows the month
+ * needs. Today carries a silent warm frame; weekend columns are dimmed and the
+ * leading/trailing cells ghost the neighbouring months' day numbers. The view
+ * date is reset to the real "today" (via SystemClock) every time the surface
+ * opens. `implicitHeight` lets the pill shrink to the live row count, and
+ * `todayX/todayY/todayVisible` expose today's cell centre for the flame lap.
  */
 Item {
     id: root
@@ -22,6 +24,22 @@ Item {
     property date today: sysClock.date
     property int viewYear: today.getFullYear()
     property int viewMonth: today.getMonth()
+
+    readonly property int offset: firstWeekdayOffset(viewYear, viewMonth)
+    readonly property int monthLen: daysInMonth(viewYear, viewMonth)
+    readonly property int rows: Math.ceil((offset + monthLen) / 7)
+
+    readonly property real cellH: 24 * s
+    readonly property real rowGap: 2 * s
+
+    implicitHeight: grid.y + rows * cellH + (rows - 1) * rowGap
+
+    readonly property bool todayVisible: viewMonth === today.getMonth()
+        && viewYear === today.getFullYear()
+    readonly property int todayIndex: offset + today.getDate() - 1
+    readonly property real cellW: grid.width / 7
+    readonly property real todayX: grid.x + (todayIndex % 7 + 0.5) * cellW
+    readonly property real todayY: grid.y + (Math.floor(todayIndex / 7) + 0.5) * (cellH + rowGap) - rowGap / 2
 
     SystemClock {
         id: sysClock
@@ -105,16 +123,18 @@ Item {
                     required property int modelData
                     width: 22 * root.s
                     height: 22 * root.s
-                    radius: 6 * root.s
-                    color: navArea.containsMouse ? Theme.slotBg : "transparent"
+                    radius: Motion.rSmall * root.s
+                    color: navArea.containsMouse ? Theme.frameBg : "transparent"
+                    border.width: navArea.containsMouse ? 1 : 0
+                    border.color: Theme.frameBorder
 
-                    Text {
+                    GlyphIcon {
                         anchors.centerIn: parent
-                        text: nav.modelData < 0 ? "‹" : "›"
-                        color: Theme.vermLit
-                        font.family: Theme.font
-                        font.pixelSize: 15 * root.s
-                        font.weight: Font.DemiBold
+                        width: 16 * root.s
+                        height: 16 * root.s
+                        name: nav.modelData < 0 ? "chevron-left" : "chevron-right"
+                        color: navArea.containsMouse ? Theme.cream : Theme.iconDim
+                        stroke: 1.8
                     }
 
                     MouseArea {
@@ -152,13 +172,14 @@ Item {
             Item {
                 id: wd
                 required property int index
+                readonly property bool weekend: index >= 5
                 width: weekdays.width / 7
                 height: 16 * root.s
 
                 Text {
                     anchors.centerIn: parent
                     text: root.loc.standaloneDayName((wd.index + 1) % 7, Locale.NarrowFormat)
-                    color: Theme.dim
+                    color: wd.weekend ? Theme.faint : Theme.dim
                     font.family: Theme.font
                     font.pixelSize: 9 * root.s
                     font.weight: Font.Medium
@@ -170,50 +191,69 @@ Item {
 
     Grid {
         id: grid
-        anchors.top: weekdays.bottom
-        anchors.topMargin: 4 * root.s
+        y: weekdays.y + weekdays.height + 4 * root.s
         anchors.left: parent.left
         anchors.right: parent.right
         columns: 7
-        rowSpacing: 2 * root.s
+        rowSpacing: root.rowGap
         columnSpacing: 0
 
         Repeater {
-            model: 42
+            model: root.rows * 7
 
             Item {
                 id: cell
                 required property int index
+                readonly property int weekday: index % 7
+                readonly property bool weekend: weekday >= 5
                 width: grid.width / 7
-                height: 24 * root.s
+                height: root.cellH
 
-                readonly property int dayNum: index - root.firstWeekdayOffset(root.viewYear, root.viewMonth) + 1
-                readonly property bool inMonth: dayNum >= 1 && dayNum <= root.daysInMonth(root.viewYear, root.viewMonth)
+                readonly property int dayNum: index - root.offset + 1
+                readonly property bool inMonth: dayNum >= 1 && dayNum <= root.monthLen
                 readonly property bool current: inMonth && root.isToday(dayNum)
+                readonly property int ghostNum: dayNum < 1
+                    ? root.daysInMonth(root.viewYear, root.viewMonth - 1) + dayNum
+                    : dayNum - root.monthLen
 
                 Rectangle {
                     anchors.centerIn: parent
                     width: 22 * root.s
                     height: 22 * root.s
-                    radius: 6 * root.s
-                    visible: cell.current
+                    radius: Motion.rSmall * root.s
+                    color: cellArea.containsMouse && cell.inMonth && !cell.current
+                        ? Qt.rgba(0.94, 0.88, 0.84, 0.04) : "transparent"
+                }
 
-                    gradient: Gradient {
-                        GradientStop { position: 0.0; color: Theme.vermLit }
-                        GradientStop { position: 1.0; color: Theme.vermDeep }
-                    }
+                Rectangle {
+                    anchors.centerIn: parent
+                    width: 24 * root.s
+                    height: 24 * root.s
+                    radius: Motion.rSmall * root.s
+                    visible: cell.current
+                    color: Theme.frameBg
+                    border.width: 1
+                    border.color: Theme.frameBorder
                 }
 
                 Text {
                     anchors.centerIn: parent
-                    visible: cell.inMonth
-                    text: cell.dayNum
-                    color: cell.current ? Theme.bright : Theme.cream
-                    opacity: cell.current ? 1.0 : 0.85
+                    text: cell.inMonth ? cell.dayNum : cell.ghostNum
+                    color: cell.inMonth
+                        ? (cell.current ? Theme.todayWarm
+                            : (cell.weekend ? Theme.subtle : Theme.cream))
+                        : Theme.ghost
+                    opacity: cell.inMonth && !cell.current && !cell.weekend ? 0.85 : 1.0
                     font.family: Theme.font
                     font.pixelSize: 11 * root.s
                     font.weight: cell.current ? Font.DemiBold : Font.Normal
                     font.features: { "tnum": 1 }
+                }
+
+                MouseArea {
+                    id: cellArea
+                    anchors.fill: parent
+                    hoverEnabled: true
                 }
             }
         }

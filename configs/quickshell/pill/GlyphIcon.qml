@@ -41,7 +41,9 @@ Item {
         "next-s": { d: "M7 5.5l9 6.5-9 6.5z M17 5.5v13", fill: false },
         "prev-s": { d: "M17 5.5l-9 6.5 9 6.5z M7 5.5v13", fill: false },
         "dnd": { d: "M6 16V11a6 6 0 0 1 9.3-5M18 11v5M4 16h16M10.5 20a1.8 1.8 0 0 0 3 0M3 3l18 18", fill: false },
-        "awake": { d: "M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z", fill: false }
+        "awake": { d: "M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6-10-6-10-6zM12 9a3 3 0 1 0 0 6 3 3 0 0 0 0-6z", fill: false },
+        "chevron-left": { d: "M14 6l-6 6 6 6", fill: false },
+        "chevron-right": { d: "M10 6l6 6-6 6", fill: false }
     })
 
     readonly property var g: glyphs[name] !== undefined ? glyphs[name] : ({ d: "", fill: false })
