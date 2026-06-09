@@ -125,8 +125,9 @@ Item {
                         if (cell.modelData.confirm && tile.hold > 0.001) {
                             root.holdingIndex = cell.index;
                             root.holdProgress = tile.hold;
-                            root.tileHeatX = tiles.x + tile.x + tile.width / 2;
-                            root.tileHeatY = tiles.y + tile.y + tile.height / 2;
+                            const c = tile.mapToItem(root, tile.width / 2, tile.height / 2);
+                            root.tileHeatX = c.x;
+                            root.tileHeatY = c.y;
                         } else if (root.holdingIndex === cell.index) {
                             root.holdingIndex = -1;
                             root.holdProgress = 0;
