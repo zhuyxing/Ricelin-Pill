@@ -24,8 +24,16 @@ Item {
     property int selectedIndex: 0
     property var usage: ({})
 
-    readonly property real caretX: field.mapToItem(root, field.cursorRectangle.x + field.cursorRectangle.width / 2, 0).x
-    readonly property real caretY: field.mapToItem(root, 0, field.cursorRectangle.y + field.cursorRectangle.height / 2).y
+    readonly property point caretPoint: {
+        void root.width;
+        void root.height;
+        void field.width;
+        return field.mapToItem(root,
+            field.cursorRectangle.x + field.cursorRectangle.width / 2,
+            field.cursorRectangle.y + field.cursorRectangle.height / 2);
+    }
+    readonly property real caretX: caretPoint.x
+    readonly property real caretY: caretPoint.y
 
     readonly property string usageFile: (Quickshell.env("XDG_STATE_HOME") || (Quickshell.env("HOME") + "/.local/state")) + "/ricelin/launcher-usage.json"
 

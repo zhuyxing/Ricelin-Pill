@@ -59,8 +59,14 @@ Item {
     property bool dragging: false
     readonly property real frac: dragging ? dragFrac : playFrac
 
-    readonly property real seamHeadX: seamFill.mapToItem(root, seamFill.width, seamFill.height / 2).x
-    readonly property real seamHeadY: seamFill.mapToItem(root, seamFill.width, seamFill.height / 2).y
+    readonly property point seamHead: {
+        void root.width;
+        void root.height;
+        void root.frac;
+        return seamFill.mapToItem(root, seamFill.width, seamFill.height / 2);
+    }
+    readonly property real seamHeadX: seamHead.x
+    readonly property real seamHeadY: seamHead.y
 
     function fmt(sec) {
         if (!(sec > 0))

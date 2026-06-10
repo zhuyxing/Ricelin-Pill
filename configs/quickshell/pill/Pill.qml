@@ -43,8 +43,6 @@ Item {
     property bool hoverLatch: false
     readonly property bool expanded: surfaceOpen || held || hoverLatch
     readonly property bool toastActive: Notifs.popups.length > 0
-    property string surfaceFlamePhase: "fly"
-    readonly property bool flameSurface: mediaOpen || launcherOpen || calendarOpen || powerOpen || mixerOpen || linkOpen
 
     readonly property real restW: 160 * s
     readonly property real restH: 38 * s
@@ -173,72 +171,34 @@ Item {
         }
     }
 
-    Flame {
-        id: flame
+    Ame {
+        id: ame
         anchors.fill: parent
         s: pill.s
         pillW: pill.width
         pillH: pill.height
-        musicActive: Cava.active
         heat: pill.powerOpen ? power.holdProgress : 0
-        pulse: Cava.values && Cava.values.length
-            ? Cava.values.reduce((a, b) => a + b, 0) / Cava.values.length
-            : 0
-        dockPoint: pill.calendarOpen
-            ? (calendar.todayVisible
-                ? Qt.point(calendar.x + calendar.todayX, calendar.y + calendar.todayY)
-                : Qt.point(pill.width / 2, pill.height / 2))
+        form: pill.mediaOpen ? "seam"
+            : (pill.launcherOpen ? "caret"
+            : (pill.calendarOpen ? (calendar.todayVisible ? "ring" : "dock")
+            : (pill.mixerOpen || pill.powerOpen || pill.linkOpen ? "dock"
+            : (pill.mode === "toast" ? "off"
+            : "rest"))))
+        point: pill.mediaOpen
+            ? Qt.point(media.x + media.seamHeadX, media.y + media.seamHeadY)
             : (pill.launcherOpen
             ? Qt.point(launcher.x + launcher.caretX, launcher.y + launcher.caretY)
-            : (pill.powerOpen
-            ? Qt.point(power.x + power.heatX, power.y + power.heatY)
-            : (pill.linkOpen
-            ? Qt.point(link.x + link.emberX, link.y + link.emberY)
-            : Qt.point(media.x + media.seamHeadX, media.y + media.seamHeadY))))
-        flyTarget: pill.mixerOpen
-            ? Qt.point(mixer.x + mixer.width / 2, mixer.y + mixer.height / 2)
             : (pill.calendarOpen
             ? (calendar.todayVisible
                 ? Qt.point(calendar.x + calendar.todayX, calendar.y + calendar.todayY)
                 : Qt.point(pill.width / 2, pill.height / 2))
-            : (pill.launcherOpen
-            ? Qt.point(launcher.x + launcher.caretX, launcher.y + launcher.caretY)
+            : (pill.mixerOpen
+            ? Qt.point(mixer.x + mixer.focusTickPoint.x, mixer.y + mixer.focusTickPoint.y)
             : (pill.powerOpen
             ? Qt.point(power.x + power.heatX, power.y + power.heatY)
             : (pill.linkOpen
             ? Qt.point(link.x + link.emberX, link.y + link.emberY)
-            : Qt.point(media.x + media.seamHeadX, media.y + media.seamHeadY)))))
-        mode: pill.flameSurface ? pill.surfaceFlamePhase
-            : (pill.surfaceOpen ? "off"
-            : (pill.expanded && musicActive ? "held" : "orbit"))
-    }
-
-    onMediaOpenChanged: if (mediaOpen) surfaceFlamePhase = "fly"
-    onLauncherOpenChanged: if (launcherOpen) surfaceFlamePhase = "fly"
-    onCalendarOpenChanged: if (calendarOpen) surfaceFlamePhase = "fly"
-    onPowerOpenChanged: if (powerOpen) surfaceFlamePhase = "fly"
-    onMixerOpenChanged: if (mixerOpen) surfaceFlamePhase = "fly"
-    onLinkOpenChanged: if (linkOpen) surfaceFlamePhase = "fly"
-
-    Connections {
-        target: flame
-        function onFlightDone() {
-            if (pill.mediaOpen)
-                pill.surfaceFlamePhase = "dock";
-            else if (pill.launcherOpen)
-                pill.surfaceFlamePhase = "caret";
-            else if (pill.calendarOpen)
-                pill.surfaceFlamePhase = "lap";
-            else if (pill.powerOpen)
-                pill.surfaceFlamePhase = "dock";
-            else if (pill.mixerOpen) {
-                flame.sparkTargets = mixer.tickPoints().map(function (p) {
-                    return Qt.point(mixer.x + p.x, mixer.y + p.y);
-                });
-                pill.surfaceFlamePhase = "spark";
-            } else if (pill.linkOpen)
-                pill.surfaceFlamePhase = "dock";
-        }
+            : Qt.point(pill.width - 14 * pill.s, pill.height / 2))))))
     }
 
     HoverHandler {
@@ -677,9 +637,9 @@ Item {
     }
 
     MouseArea {
-        visible: flame.mode === "held"
-        x: flame.px - 16 * pill.s
-        y: flame.py - 16 * pill.s
+        visible: ame.form === "rest" && pill.hasMedia
+        x: ame.bx - 16 * pill.s
+        y: ame.by - 16 * pill.s
         width: 32 * pill.s
         height: 32 * pill.s
         cursorShape: Qt.PointingHandCursor

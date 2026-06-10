@@ -39,6 +39,21 @@ Item {
     }
 
     /**
+     * Tick centre of the currently focused fader, mapped live to this mixer's
+     * root, so the bead can glide as keyboard/hover focus moves across the row.
+     * Layout dependencies are voided before the mapToItem so the binding
+     * re-evaluates when the surface resizes rather than going stale.
+     */
+    readonly property point focusTickPoint: {
+        void root.width;
+        void root.height;
+        void root.focusIndex;
+        const i = Math.max(0, Math.min(faders.length - 1, root.focusIndex));
+        const f = faders[i];
+        return f.mapToItem(root, f.tickCenter.x, f.tickCenter.y);
+    }
+
+    /**
      * Pointer-driven fader targeting. MouseArea hover delivery is unreliable on
      * this layer-shell surface, so a non-blocking HoverHandler is the single
      * hover source: its pointer x maps to a fader column, which drives keyboard
