@@ -361,13 +361,10 @@ Item {
     }
 
     /**
-     * The media bud protrudes past the pill's right edge, outside the window
-     * input region derived from the pill item — this rect extends the mask so
-     * the outer half of the bud stays clickable. Window coordinates.
+     * Extra input width past the pill's right edge while the media bud
+     * protrudes there, so the window mask can cover the bud's outer half.
      */
-    readonly property rect budRect: bud.shown
-        ? Qt.rect(pill.x + bud.x, pill.y + bud.y, bud.width, bud.height)
-        : Qt.rect(0, 0, 0, 0)
+    readonly property real inputPadRight: bud.shown ? bud.budR + 2 * s : 0
 
     onHoveredChanged: {
         if (hovered) {
