@@ -26,8 +26,8 @@ Item {
 
     readonly property real anchorX: tiles.x + tiles.width / 2
     readonly property real anchorY: tiles.y - 10 * root.s
-    property real tileHeatX: anchorX
-    property real tileHeatY: anchorY
+    property real tileHeatX: 0
+    property real tileHeatY: 0
     readonly property real heatX: holdingIndex >= 0 ? tileHeatX : anchorX
     readonly property real heatY: holdingIndex >= 0 ? tileHeatY : anchorY
 

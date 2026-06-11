@@ -63,6 +63,8 @@ Item {
         void root.width;
         void root.height;
         void root.frac;
+        void seam.x;
+        void seam.width;
         return seamFill.mapToItem(root, seamFill.width, seamFill.height / 2);
     }
     readonly property real seamHeadX: seamHead.x

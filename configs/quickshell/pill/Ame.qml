@@ -10,39 +10,52 @@ import "Singletons"
  * music, audio or physics coupling whatsoever — every motion is a deterministic,
  * choreographed timeline.
  *
- * When a surface opens, closes or moves its anchor far enough, the bead runs the
- * full shapeshift over `Motion.shapeshift` ms: anticipation stretch, a remnant
- * droplet pinching off at the origin, a quadratic-bezier flight with a tapered
- * liquid streak, a three-droplet landing splash, then an easeOutBack settle into
- * the per-surface form. Small target moves (seam progress, mixer focus, hover
- * width) glide directly over `Motion.glide` ms with the form intact.
+ * Travel contract: a form change runs the full shapeshift over
+ * `Motion.shapeshift` ms — anticipation stretch, a remnant droplet pinching off
+ * at the origin, a quadratic-bezier flight with a tapered liquid streak, a
+ * three-droplet landing splash, then an easeOutBack settle into the new form.
+ * The flight is launched once and tracks a moving target live (bezier endpoint,
+ * control point and heading are recomputed per frame), so anchors that slide
+ * with the pill's 320ms morph bend the arc instead of restarting it. A form
+ * change over a short distance skips the travel acts and plays the settle
+ * transformation in place. All same-form target moves — hover width, seam
+ * progress, mixer focus hops, seeks — glide over `Motion.glide` ms, chasing the
+ * anchor without ever escalating into a flight.
  *
- * Forms: "rest"/"hover" rest bead, "caret" blinking launcher capsule, "seam"
- * media bead, "ring" calendar ring, "dock" plain bead (mixer/power/link), "off"
- * hidden. The body renders on a QtQuick Canvas: a FrameAnimation drives 60fps
- * repaint only while the timeline, splash or remnant is live or the caret is
- * blinking; otherwise a 12fps Timer ticks the slow inner swirl arcs so the
+ * Forms: "rest" breathing bead, "caret" blinking launcher capsule, "seam" media
+ * bead, "ring" calendar ring, "dock" plain bead (mixer/power/link), "off"
+ * hidden. Entering "off" fades the bead out over `Motion.fast` ms; leaving it
+ * snaps to the current anchor and pops back in with the settle act, so toast
+ * and OSD handoffs never produce ghost flights from stale positions. The body
+ * renders on a QtQuick Canvas: a FrameAnimation drives full-rate repaint only
+ * while the timeline, splash, remnant or a glide is live; otherwise a Timer
+ * ticks the slow inner swirl at 12fps (30fps while the caret blinks) so the
  * idle cost stays minimal for a shell that runs 24/7.
  */
 Item {
     id: root
 
     property real s: 1
-    property real pillW: 160
-    property real pillH: 38
     property point point: Qt.point(0, 0)
     property string form: "rest"
     property real heat: 0
 
-    visible: form !== "off"
+    opacity: form === "off" ? 0 : 1
+    Behavior on opacity { NumberAnimation { duration: Motion.fast } }
+    visible: opacity > 0.001
 
     readonly property real restR: 5 * s
     readonly property real heatScale: 1 - 0.4 * heat
     readonly property real flightThreshold: 30 * s
+    readonly property real pAntic: 0.146
+    readonly property real pFly: 0.658
 
     property real bx: 0
     property real by: 0
     property string activeForm: "rest"
+    property bool hidden: false
+    property bool arcFlip: false
+    property point lastTarget: Qt.point(0, 0)
 
     property real prog: 1
     property string phase: "idle"
@@ -74,26 +87,59 @@ Item {
                         v * v * a.y + 2 * v * u * c.y + u * u * b.y);
     }
 
-    function startFlight(target, targetForm) {
-        fromPoint = Qt.point(bx, by);
-        const dx = target.x - bx;
-        const dy = target.y - by;
+    /**
+     * Recompute heading, distance and the perpendicular bezier control point
+     * for the current fromPoint→point pair. Called per frame during the antic
+     * and fly phases so a target that slides mid-flight bends the arc and the
+     * painted streak stays on the same curve as the bead. The arc side is
+     * latched in startFlight (arcFlip) — re-deciding it per frame would mirror
+     * the whole curve in one frame when the target crosses the vertical
+     * through the origin.
+     */
+    function updateFlightGeo() {
+        const dx = point.x - fromPoint.x;
+        const dy = point.y - fromPoint.y;
         const dd = Math.hypot(dx, dy) || 1;
         flightDist = dd;
         flightAng = Math.atan2(dy, dx);
         let px = -dy / dd;
         let py = dx / dd;
-        if (py > 0) { px = -px; py = -py; }
-        ctrlPoint = Qt.point((bx + target.x) / 2 + px * dd * 0.22,
-                             (by + target.y) / 2 + py * dd * 0.22);
-        remnantPoint = Qt.point(bx, by);
-        remnant = dd > root.flightThreshold ? 1 : 0;
-        activeForm = targetForm;
+        if (arcFlip) { px = -px; py = -py; }
+        ctrlPoint = Qt.point((fromPoint.x + point.x) / 2 + px * dd * 0.22,
+                             (fromPoint.y + point.y) / 2 + py * dd * 0.22);
+    }
+
+    function stopGlide() {
         glideAnim.stop();
+        glideTo = Qt.point(bx, by);
         glideT = 1;
+    }
+
+    function startFlight(targetForm) {
+        fromPoint = Qt.point(bx, by);
+        arcFlip = point.x > fromPoint.x;
+        updateFlightGeo();
+        remnantAnim.stop();
+        remnantPoint = Qt.point(bx, by);
+        remnant = flightDist > root.flightThreshold ? 1 : 0;
+        activeForm = targetForm;
+        stopGlide();
+        settleAnim.stop();
         flightAnim.restart();
         if (remnant > 0)
             remnantAnim.restart();
+    }
+
+    /**
+     * In-place transformation: skip the travel acts and replay only the settle
+     * window (splash + easeOutBack pop) so a nearby form change still reads as
+     * a shapeshift without a pointless flight.
+     */
+    function startMorph(targetForm) {
+        flightAnim.stop();
+        activeForm = targetForm;
+        prog = root.pFly;
+        settleAnim.restart();
     }
 
     function startGlide(target) {
@@ -103,30 +149,93 @@ Item {
         glideAnim.restart();
     }
 
+    /**
+     * Re-show after a hidden ("off") period: geometry may have drifted while
+     * point changes were ignored, so snap to the current anchor and pop in with
+     * the settle act instead of flying from a stale origin.
+     */
+    function appear() {
+        stopGlide();
+        remnantAnim.stop();
+        remnant = 0;
+        bx = point.x;
+        by = point.y;
+        startMorph(form);
+    }
+
     function retarget() {
         const dx = point.x - bx;
         const dy = point.y - by;
         const dd = Math.hypot(dx, dy);
-        if (form !== activeForm || dd > root.flightThreshold)
-            startFlight(point, form);
-        else if (dd > 0.5)
+        if (form !== activeForm) {
+            if (dd > root.flightThreshold) {
+                startFlight(form);
+            } else {
+                flightAnim.stop();
+                settleAnim.stop();
+                if (dd > 0.5)
+                    startGlide(point);
+                startMorph(form);
+            }
+        } else if (timelineLive && prog < root.pFly) {
+            const jump = Math.hypot(point.x - lastTarget.x, point.y - lastTarget.y);
+            if (jump > root.flightThreshold) {
+                flightAnim.stop();
+                startGlide(point);
+                prog = 1;
+            }
+        } else if (dd > 0.5) {
             startGlide(point);
-        else {
+        } else if (!gliding) {
             bx = point.x;
             by = point.y;
         }
     }
 
-    onPointChanged: if (root.visible) retarget()
-    onFormChanged: {
-        if (!root.visible) { activeForm = form; return; }
-        retarget();
+    /**
+     * Coalesced decision point. form and point are sibling bindings in Pill
+     * whose change handlers fire mid-cascade in unspecified order — deciding
+     * synchronously would read a stale partner value (a far form change sees
+     * dd≈0 against the not-yet-updated point and silently degrades the flight
+     * to an in-place morph). Qt.callLater defers the decision until both
+     * bindings have settled and collapses the per-frame handler bursts of a
+     * pill morph into one retarget per tick. lastTarget tracks the previous
+     * settled anchor so a mid-flight DISCRETE hop (mixer focus jump, seek
+     * snap) is distinguished from a morph slide and handed over to a glide
+     * instead of teleporting the airborne bead.
+     */
+    function decide() {
+        if (form === "off") {
+            if (hidden)
+                return;
+            hidden = true;
+            flightAnim.stop();
+            settleAnim.stop();
+            remnantAnim.stop();
+            remnant = 0;
+            stopGlide();
+            prog = 1;
+            return;
+        }
+        if (hidden) {
+            hidden = false;
+            appear();
+        } else {
+            retarget();
+        }
+        lastTarget = Qt.point(point.x, point.y);
     }
+
+    onPointChanged: Qt.callLater(root.decide)
+    onFormChanged: Qt.callLater(root.decide)
+    onHeatChanged: canvas.requestPaint()
 
     Component.onCompleted: {
         bx = point.x;
         by = point.y;
         activeForm = form;
+        hidden = form === "off";
+        lastTarget = Qt.point(point.x, point.y);
     }
 
     NumberAnimation {
@@ -136,6 +245,15 @@ Item {
         from: 0
         to: 1
         duration: Motion.shapeshift
+        easing.type: Easing.Linear
+    }
+
+    NumberAnimation {
+        id: settleAnim
+        target: root
+        property: "prog"
+        to: 1
+        duration: Math.round(Motion.shapeshift * (1 - root.pFly))
         easing.type: Easing.Linear
     }
 
@@ -160,22 +278,26 @@ Item {
     }
 
     onProgChanged: {
-        const P_ANTIC = 0.146;
-        const P_FLY = 0.658;
-        if (prog < P_ANTIC) {
+        if (prog < pAntic) {
             phase = "antic";
+            updateFlightGeo();
             bx = fromPoint.x;
             by = fromPoint.y;
-        } else if (prog < P_FLY) {
+        } else if (prog < pFly) {
             phase = "fly";
-            const u = easeInOutQuint((prog - P_ANTIC) / (P_FLY - P_ANTIC));
+            updateFlightGeo();
+            const u = easeInOutQuint((prog - pAntic) / (pFly - pAntic));
             const p = bez(fromPoint, ctrlPoint, point, u);
             bx = p.x;
             by = p.y;
         } else {
-            phase = "settle";
-            bx = point.x;
-            by = point.y;
+            if (phase === "fly")
+                flightAng = Math.atan2(point.y - ctrlPoint.y, point.x - ctrlPoint.x);
+            phase = prog >= 1 ? "idle" : "settle";
+            if (!gliding) {
+                bx = point.x;
+                by = point.y;
+            }
         }
     }
 
@@ -189,7 +311,7 @@ Item {
     }
 
     FrameAnimation {
-        running: root.visible && (root.busy || root.blinking)
+        running: root.visible && root.busy
         onTriggered: {
             root.swirl += frameTime * 0.5;
             canvas.requestPaint();
@@ -197,11 +319,11 @@ Item {
     }
 
     Timer {
-        running: root.visible && !root.busy && !root.blinking
-        interval: 83
+        running: root.visible && !root.busy
+        interval: root.blinking ? 33 : 83
         repeat: true
         onTriggered: {
-            root.swirl += 0.083 * 0.5;
+            root.swirl += interval * 0.0005;
             canvas.requestPaint();
         }
     }
@@ -285,14 +407,14 @@ Item {
             }
 
             if (root.phase === "antic") {
-                const q = root.clamp01(root.prog / 0.146);
+                const q = root.clamp01(root.prog / root.pAntic);
                 const pull = root.smoothstep(q) * 0.55;
                 bead(ctx, bx, by, baseR, pull, root.flightAng);
                 return;
             }
 
             if (root.phase === "fly") {
-                const q = (root.prog - 0.146) / (0.658 - 0.146);
+                const q = (root.prog - root.pAntic) / (root.pFly - root.pAntic);
                 const u = root.easeInOutQuint(root.clamp01(q));
                 const tail = Math.max(0, u - 0.26 * Math.sin(Math.PI * Math.min(1, q * 1.4)));
                 const NSEG = 15;
@@ -320,7 +442,7 @@ Item {
             }
 
             const settling = root.phase === "settle";
-            const q = settling ? root.clamp01((root.prog - 0.658) / (1 - 0.658)) : 1;
+            const q = settling ? root.clamp01((root.prog - root.pFly) / (1 - root.pFly)) : 1;
             const e = settling ? root.easeOutBack(q) : 1;
             const fadeIn = settling ? root.smoothstep(root.clamp01(q * 1.8)) : 1;
 

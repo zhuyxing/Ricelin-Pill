@@ -23,7 +23,18 @@ Item {
 
     readonly property real trackH: 86 * s
 
-    readonly property point tickCenter: tick.mapToItem(root, tick.width / 2, tick.height / 2)
+    /**
+     * Live tick centre in this fader's coordinates. tick.y and root.width are
+     * voided because mapToItem creates no QML dependency on the source item's
+     * transform — without them the binding snapshots the tick where it first
+     * rendered and the bead docks at a stale height after a value change and a
+     * stale x after the mixer resizes.
+     */
+    readonly property point tickCenter: {
+        void tick.y;
+        void root.width;
+        return tick.mapToItem(root, tick.width / 2, tick.height / 2);
+    }
 
     implicitWidth: 54 * s
     implicitHeight: trackH + 44 * s

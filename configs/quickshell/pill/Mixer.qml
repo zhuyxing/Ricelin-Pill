@@ -29,16 +29,6 @@ Item {
     readonly property bool surfaceHovered: hoverTracker.hovered
 
     /**
-     * Tick centres of the four faders, mapped to this mixer's root. Snapshotted
-     * on demand (at mixer open) for the flame's spark scatter — not live-bound.
-     */
-    function tickPoints() {
-        return faders.map(function (f) {
-            return f.mapToItem(root, f.tickCenter.x, f.tickCenter.y);
-        });
-    }
-
-    /**
      * Tick centre of the currently focused fader, mapped live to this mixer's
      * root, so the bead can glide as keyboard/hover focus moves across the row.
      * Layout dependencies are voided before the mapToItem so the binding

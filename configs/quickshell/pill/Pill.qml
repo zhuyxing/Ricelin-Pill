@@ -179,8 +179,6 @@ Item {
         id: ame
         anchors.fill: parent
         s: pill.s
-        pillW: pill.width
-        pillH: pill.height
         heat: pill.powerOpen ? power.holdProgress : 0
         form: pill.mediaOpen ? "seam"
             : (pill.launcherOpen ? "caret"
@@ -661,7 +659,7 @@ Item {
     }
 
     MouseArea {
-        visible: ame.form === "rest" && pill.hasMedia
+        visible: pill.mode === "rest" && pill.hasMedia
         x: ame.bx - 16 * pill.s
         y: ame.by - 16 * pill.s
         width: 32 * pill.s
