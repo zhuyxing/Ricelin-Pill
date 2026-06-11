@@ -685,7 +685,7 @@ Item {
     }
 
     MouseArea {
-        visible: pill.mode === "rest" && pill.hasMedia
+        visible: ame.form === "rest" && pill.hasMedia
         x: ame.bx - 16 * pill.s
         y: ame.by - 16 * pill.s
         width: 32 * pill.s
