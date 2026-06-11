@@ -316,7 +316,7 @@ Item {
             : (pill.launcherOpen || pill.clipboardOpen ? "caret"
             : (pill.calendarOpen ? (calendar.todayVisible ? "ring" : "dock")
             : (pill.mixerOpen ? "tick"
-            : (pill.powerOpen ? (power.holdingIndex >= 0 ? "dock" : (power.hovered.length ? "soul" : "off"))
+            : (pill.powerOpen ? (power.holdingIndex >= 0 ? "dock" : (power.soulKey.length ? "soul" : "off"))
             : (pill.linkOpen ? (link.rowFocused ? "rowseam" : "off")
             : (pill.mode === "hover" && pill.hoverSoulGate ? "soul"
             : "off"))))))
@@ -419,7 +419,7 @@ Item {
         id: hover
         anchors.fill: parent
         opacity: pill.mode === "hover" ? Math.pow(pill.morphCloseness, 1.2) : 0
-        visible: opacity > 0.01
+        visible: true
         Behavior on opacity { NumberAnimation { duration: pill.mode === "hover" ? Motion.fast : 40 } }
 
         readonly property bool live: pill.mode === "hover"

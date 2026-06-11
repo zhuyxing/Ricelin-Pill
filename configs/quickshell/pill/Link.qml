@@ -43,27 +43,16 @@ Item {
      * when nothing is focused. Only the main subview participates.
      */
     property Item focusRowItem: null
-    property Item pendingClearItem: null
 
+    /**
+     * Sticky: once a row has been focused the seam stays parked on it when the
+     * pointer leaves, gliding to the next focused row instead of re-waking
+     * from the pill centre on every hover. Cleared only when the surface
+     * closes.
+     */
     function reportRowHover(item, hovered) {
-        if (hovered) {
-            unhoverGrace.stop();
-            pendingClearItem = null;
+        if (hovered)
             focusRowItem = item;
-        } else if (focusRowItem === item) {
-            pendingClearItem = item;
-            unhoverGrace.restart();
-        }
-    }
-
-    Timer {
-        id: unhoverGrace
-        interval: 140
-        onTriggered: {
-            if (root.focusRowItem === root.pendingClearItem)
-                root.focusRowItem = null;
-            root.pendingClearItem = null;
-        }
     }
 
     readonly property bool rowFocused: focusRowItem !== null && subview === "main" && active
