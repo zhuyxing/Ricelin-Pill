@@ -14,7 +14,14 @@ echo "   target : ${DEST_DIR}"
 echo ":: Copying theme files (sudo)"
 sudo install -d -m 0755 "${DEST_DIR}"
 sudo cp -aT "${SRC_DIR}" "${DEST_DIR}"
-sudo rm -f "${DEST_DIR}/install.sh"
+sudo rm -f "${DEST_DIR}/install.sh" "${DEST_DIR}/Xsetup-torii.sh"
+
+echo ":: Installing X11 setup script (primary output + cursor warp)"
+sudo install -D -m 0755 "${SRC_DIR}/Xsetup-torii.sh" /etc/sddm/Xsetup-torii.sh
+sudo tee "${CONF_DIR}/20-xsetup.conf" >/dev/null <<EOF
+[X11]
+DisplayCommand=/etc/sddm/Xsetup-torii.sh
+EOF
 
 echo ":: Writing ${CONF_FILE} (sudo)"
 sudo install -d -m 0755 "${CONF_DIR}"

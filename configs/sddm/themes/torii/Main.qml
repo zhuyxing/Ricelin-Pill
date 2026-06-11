@@ -50,6 +50,10 @@ Item {
     }
 
     function submit() {
+        if (passwordField.text.length === 0) {
+            passwordField.forceActiveFocus()
+            return
+        }
         errorRow.shown = false
         if (hasSddm)
             sddm.login(currentUserName, passwordField.text, currentSessionIndex)
@@ -116,6 +120,15 @@ Item {
         acceptedButtons: Qt.NoButton
         hoverEnabled: true
         cursorShape: Qt.ArrowCursor
+        onContainsMouseChanged: {
+            if (root.onPrimary && containsMouse) {
+                var w = root.Window.window
+                if (w)
+                    w.requestActivate()
+                if (!passwordField.activeFocus)
+                    passwordField.forceActiveFocus()
+            }
+        }
     }
 
     Rectangle {
@@ -127,7 +140,6 @@ Item {
     Item {
         id: stage
         anchors.fill: parent
-        visible: root.onPrimary
         clip: true
 
     MediaPlayer {
@@ -135,7 +147,7 @@ Item {
         source: Qt.resolvedUrl(root.cfg("background", "assets/bg.mp4"))
         videoOutput: bgVideo
         loops: MediaPlayer.Infinite
-        Component.onCompleted: if (root.onPrimary) bgPlayer.play()
+        Component.onCompleted: bgPlayer.play()
     }
 
     Image {
@@ -169,7 +181,7 @@ Item {
         anchors.fill: parent
         z: 5
         Repeater {
-            model: root.onPrimary ? 5 : 0
+            model: 5
             delegate: Rectangle {
                 id: ember
                 required property int index
@@ -223,7 +235,7 @@ Item {
         anchors.fill: parent
         z: 4
         Repeater {
-            model: root.onPrimary ? 4 : 0
+            model: 4
             delegate: Rectangle {
                 id: petal
                 required property int index
@@ -282,6 +294,7 @@ Item {
     Item {
         id: topLeft
         z: 10
+        visible: root.onPrimary
         x: parent.width * 0.055
         y: parent.height * 0.065
 
@@ -358,6 +371,7 @@ Item {
     Column {
         id: shrineColumn
         z: 10
+        visible: root.onPrimary
         anchors.horizontalCenter: parent.horizontalCenter
         y: parent.height * 0.86 - height
         spacing: 15 * root.s
@@ -717,6 +731,7 @@ Item {
 
     Item {
         z: 10
+        visible: root.onPrimary
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
@@ -900,10 +915,28 @@ Item {
     }
 
     Timer {
-        interval: 300
-        running: true
-        repeat: false
-        onTriggered: passwordField.forceActiveFocus()
+        id: focusGrab
+        property int ticks: 0
+        interval: 350
+        running: root.onPrimary
+        repeat: true
+        onTriggered: {
+            var w = root.Window.window
+            if (w)
+                w.requestActivate()
+            passwordField.forceActiveFocus()
+            ticks++
+            if (ticks >= 5)
+                focusGrab.stop()
+        }
+    }
+
+    Connections {
+        target: root.Window.window
+        function onActiveChanged() {
+            if (root.onPrimary && root.Window.window.active)
+                passwordField.forceActiveFocus()
+        }
     }
 
     Keys.onPressed: function (event) {
