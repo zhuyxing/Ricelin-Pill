@@ -111,7 +111,10 @@ Item {
     }
 
     onPlayerChanged: {
-        stickyPlayer = player;
+        Qt.callLater(function() {
+            if (stickyPlayer !== player)
+                stickyPlayer = player;
+        });
         trackEvent();
     }
 
