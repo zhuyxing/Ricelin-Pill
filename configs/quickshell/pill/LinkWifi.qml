@@ -35,6 +35,17 @@ Item {
     property bool connecting: false
     property bool connectFailed: false
 
+    /**
+     * Draft of the password being typed for `expandedSsid`. Lives on the root
+     * because the Repeater model is a fresh array on every NM rescan, which
+     * tears down and recreates the delegate mid-typing — the field restores
+     * itself from this draft when rebuilt.
+     */
+    property string pwDraft: ""
+    property string pendingPw: ""
+    property string attemptSsid: ""
+    property bool attemptWasKnown: false
+
     implicitHeight: listFrame.y + listFrame.height
 
     function isSecured(ssid) {
@@ -81,15 +92,24 @@ Item {
             return;
         }
         connectFailed = false;
+        pwDraft = "";
         expandedSsid = ssid;
     }
 
+    /**
+     * Connects via `nmcli --ask`, feeding the password through stdin so the
+     * secret never appears in the process command line (`/proc/<pid>/cmdline`
+     * is world-readable for the whole connection attempt).
+     */
     function connectWithPassword(ssid, pw) {
         if (connProc.running || !pw.length)
             return;
         connecting = true;
         connectFailed = false;
-        connProc.command = ["nmcli", "dev", "wifi", "connect", ssid, "password", pw];
+        attemptSsid = ssid;
+        attemptWasKnown = knownProfiles[ssid] === true;
+        pendingPw = pw;
+        connProc.command = ["nmcli", "--ask", "dev", "wifi", "connect", ssid];
         connProc.running = true;
     }
 
@@ -123,15 +143,15 @@ Item {
 
     Process {
         id: profProc
-        command: ["nmcli", "-t", "-f", "NAME", "connection", "show"]
+        command: ["nmcli", "-t", "-f", "NAME,TYPE", "connection", "show"]
         stdout: StdioCollector {
             onStreamFinished: {
                 var set = {};
                 var lines = this.text.split("\n");
                 for (var i = 0; i < lines.length; i++) {
-                    var name = lines[i].replace(/\\:/g, ":").trim();
-                    if (name.length)
-                        set[name] = true;
+                    var parts = root.splitTerse(lines[i]);
+                    if (parts && parts.head.length && parts.tail === "802-11-wireless")
+                        set[parts.head] = true;
                 }
                 root.knownProfiles = set;
             }
@@ -140,18 +160,46 @@ Item {
 
     Process {
         id: connProc
+        stdinEnabled: true
         stdout: StdioCollector {}
         stderr: StdioCollector {}
+        onStarted: {
+            write(root.pendingPw + "\n");
+            root.pendingPw = "";
+        }
         onExited: function(exitCode) {
             root.connecting = false;
             if (exitCode === 0) {
                 root.expandedSsid = "";
+                root.pwDraft = "";
                 root.connectFailed = false;
                 root.refresh();
             } else {
                 root.connectFailed = true;
+                if (!root.attemptWasKnown && root.attemptSsid.length) {
+                    cleanupProc.command = ["nmcli", "connection", "delete", "id", root.attemptSsid];
+                    cleanupProc.running = true;
+                }
             }
         }
+    }
+
+    /**
+     * A failed `nmcli dev wifi connect` still leaves a connection profile
+     * named after the SSID behind; without deleting it the network would be
+     * treated as known on the next click and silently fail forever.
+     */
+    Process {
+        id: cleanupProc
+        onExited: root.refresh()
+    }
+
+    onNetsChanged: if (active) secRefresh.restart()
+
+    Timer {
+        id: secRefresh
+        interval: 1200
+        onTriggered: if (root.active) secProc.running = true
     }
 
     /**
@@ -287,12 +335,14 @@ Item {
                         width: netCol.width
                         spacing: 2 * root.s
 
-                        onExpandedChanged: {
-                            if (expanded) {
-                                pwField.text = "";
-                                Qt.callLater(pwField.forceActiveFocus);
-                            }
+                        function syncPwField() {
+                            pwField.text = root.pwDraft;
+                            pwField.cursorPosition = pwField.text.length;
+                            pwField.forceActiveFocus();
                         }
+
+                        onExpandedChanged: if (expanded) Qt.callLater(syncPwField)
+                        Component.onCompleted: if (expanded) Qt.callLater(syncPwField)
 
                         Rectangle {
                             width: parent.width
@@ -371,6 +421,7 @@ Item {
                                 placeholderTextColor: Theme.faint
                                 selectByMouse: true
                                 selectionColor: Theme.verm
+                                onTextEdited: root.pwDraft = text
                                 onAccepted: root.connectWithPassword(netItem.ssid, text)
                             }
 
