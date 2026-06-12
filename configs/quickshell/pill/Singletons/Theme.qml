@@ -34,4 +34,18 @@ Singleton {
     readonly property real shadowOpacity: 0.5
     readonly property string font: "Inter"
     readonly property string fontJp: "Zen Kaku Gothic New"
+
+    /**
+     * MPRIS trackArtists arrives as a JS array from some players and as a
+     * plain string from others (Spotify); calling join on the string throws
+     * and kills the whole binding. Normalizes both, with trackArtist as
+     * fallback.
+     */
+    function joinArtists(artists, single) {
+        if (artists && typeof artists.join === "function" && artists.length > 0)
+            return artists.join(", ");
+        if (artists && String(artists).length > 0)
+            return String(artists);
+        return single ? String(single) : "";
+    }
 }

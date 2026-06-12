@@ -40,11 +40,7 @@ Item {
         if (!player)
             return "";
         var t = player.trackTitle ? player.trackTitle : "";
-        var a = "";
-        if (player.trackArtists && player.trackArtists.length > 0)
-            a = player.trackArtists.join(", ");
-        else if (player.trackArtist)
-            a = player.trackArtist;
+        var a = Theme.joinArtists(player.trackArtists, player.trackArtist);
         return a.length > 0 ? t + " — " + a : t;
     }
 

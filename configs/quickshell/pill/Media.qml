@@ -24,10 +24,16 @@ Item {
     property bool active: false
     signal requestClose()
 
+    /**
+     * Active player preference: playing beats paused-with-track beats merely
+     * controllable — a browser exposing an empty MPRIS endpoint must not
+     * shadow a paused player that still carries a track.
+     */
     readonly property var player: {
         var list = Mpris.players.values;
         if (!list || list.length === 0)
             return null;
+        var withTrack = null;
         var controllable = null;
         for (var i = 0; i < list.length; i++) {
             var p = list[i];
@@ -35,22 +41,19 @@ Item {
                 continue;
             if (p.isPlaying)
                 return p;
+            if (!withTrack && p.canControl && p.trackTitle && p.trackTitle.length > 0)
+                withTrack = p;
             if (!controllable && p.canControl)
                 controllable = p;
         }
-        return controllable ? controllable : list[0];
+        return withTrack ? withTrack : (controllable ? controllable : list[0]);
     }
 
     readonly property bool hasPlayer: player !== null
     readonly property bool playing: hasPlayer && player.isPlaying
     readonly property string title: hasPlayer && player.trackTitle ? player.trackTitle : "Nothing playing"
-    readonly property string artist: {
-        if (!hasPlayer)
-            return "";
-        if (player.trackArtists && player.trackArtists.length > 0)
-            return player.trackArtists.join(", ");
-        return player.trackArtist ? player.trackArtist : "";
-    }
+    readonly property string artist: hasPlayer
+        ? Theme.joinArtists(player.trackArtists, player.trackArtist) : ""
     readonly property string playerService: {
         if (!hasPlayer)
             return "";
