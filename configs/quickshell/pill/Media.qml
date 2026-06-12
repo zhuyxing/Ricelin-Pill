@@ -51,7 +51,6 @@ Item {
     }
     readonly property string artUrl: hasPlayer && player.trackArtUrl ? player.trackArtUrl : ""
     readonly property bool hasArt: cover.status === Image.Ready && artUrl !== ""
-        && cover.source.toString() === artUrl
     readonly property real lengthSec: hasPlayer && player.length > 0 ? player.length : 0
     readonly property real positionSec: hasPlayer ? player.position : 0
     readonly property real playFrac: lengthSec > 0 ? Math.max(0, Math.min(1, positionSec / lengthSec)) : 0
@@ -264,7 +263,7 @@ Item {
             id: tcur
             anchors.left: parent.left
             anchors.verticalCenter: parent.verticalCenter
-            text: root.fmt(root.positionSec)
+            text: root.fmt(root.dragging ? root.dragFrac * root.lengthSec : root.positionSec)
             color: Theme.faint
             font.family: Theme.font
             font.pixelSize: 9.5 * root.s

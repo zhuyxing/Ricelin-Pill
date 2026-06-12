@@ -237,7 +237,7 @@ Item {
                         return;
                     trashFill.stop();
                     if (tile.hold < 1) {
-                        if (tile.hold < 0.15)
+                        if (tile.hold < 0.5)
                             root.activate();
                         trashDrain.restart();
                     }
@@ -249,6 +249,15 @@ Item {
                 onClicked: if (!tile.focused) root.focusIndex = tile.index
             }
         }
+    }
+
+    Text {
+        anchors.centerIn: parent
+        visible: Walls.count === 0
+        text: "Keine Wallpaper in ~/Ricelin/wallpapers"
+        color: Theme.faint
+        font.family: Theme.font
+        font.pixelSize: 10.5 * root.s
     }
 
     MouseArea {

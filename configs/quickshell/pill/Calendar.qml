@@ -21,7 +21,7 @@ Item {
 
     readonly property var loc: Qt.locale("en_US")
 
-    property date today: sysClock.date
+    readonly property date today: sysClock.date
     property int viewYear: today.getFullYear()
     property int viewMonth: today.getMonth()
 
@@ -71,7 +71,6 @@ Item {
     }
 
     function resetToday() {
-        today = sysClock.date;
         viewYear = today.getFullYear();
         viewMonth = today.getMonth();
     }

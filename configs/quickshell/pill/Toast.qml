@@ -26,9 +26,17 @@ Item {
 
     implicitHeight: Math.max(iconTile.height, col.implicitHeight)
 
+    /**
+     * Deadline is snapshotted once: binding the interval to Notifs.expireAt
+     * restarts the timer (and drifts the lifetime) every time an unrelated
+     * notification replaces the map.
+     */
+    property double deadline: 0
+    Component.onCompleted: deadline = Notifs.expireAt[notif.id] || (Date.now() + 6000)
+
     Timer {
-        interval: Math.max(300, (Notifs.expireAt[root.notif.id] || 0) - Date.now())
-        running: root.live && root.notif.urgency !== NotificationUrgency.Critical
+        interval: Math.max(300, root.deadline - Date.now())
+        running: root.deadline > 0 && root.live && root.notif.urgency !== NotificationUrgency.Critical
         onTriggered: Notifs.removePopup(root.notif)
     }
 

@@ -89,7 +89,6 @@ Item {
             if (entry.id) {
                 root.usage[entry.id] = (root.usage[entry.id] || 0) + 1;
                 usageStore.setText(JSON.stringify(root.usage));
-                usageStore.waitForJob();
             }
             entry.execute();
         }
@@ -195,6 +194,15 @@ Item {
         anchors.right: parent.right
         height: 1
         color: Theme.hair
+    }
+
+    Text {
+        anchors.centerIn: list
+        visible: root.results.length === 0
+        text: root.query.length ? "Keine Treffer" : "Keine Apps gefunden"
+        color: Theme.faint
+        font.family: Theme.font
+        font.pixelSize: 10.5 * root.s
     }
 
     ListView {

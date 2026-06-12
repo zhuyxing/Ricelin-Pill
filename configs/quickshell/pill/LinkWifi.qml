@@ -308,7 +308,16 @@ Item {
         anchors.topMargin: 8 * root.s
         anchors.left: parent.left
         anchors.right: parent.right
-        height: root.wifiOn ? Math.min(netCol.implicitHeight, 200 * root.s) : 0
+        height: root.wifiOn ? Math.min(Math.max(netCol.implicitHeight, 26 * root.s), 200 * root.s) : 0
+
+        Text {
+            anchors.centerIn: parent
+            visible: root.wifiOn && root.nets.length === 0
+            text: "Suche Netzwerke…"
+            color: Theme.faint
+            font.family: Theme.font
+            font.pixelSize: 10.5 * root.s
+        }
 
         Flickable {
             id: netFlick

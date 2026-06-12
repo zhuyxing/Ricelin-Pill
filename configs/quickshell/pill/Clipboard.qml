@@ -245,6 +245,15 @@ Item {
         }
     }
 
+    Text {
+        anchors.centerIn: list
+        visible: root.results.length === 0
+        text: root.query.length ? "Keine Treffer" : "Verlauf leer"
+        color: Theme.faint
+        font.family: Theme.font
+        font.pixelSize: 10.5 * root.s
+    }
+
     ListView {
         id: list
         anchors.top: divider.bottom

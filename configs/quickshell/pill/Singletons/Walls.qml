@@ -41,20 +41,40 @@ Singleton {
         thumbProc.running = true;
     }
 
+    /**
+     * wallpaper.sh blocks through the whole transition (awww wave, wallust,
+     * reload), easily 1-2s; a pick landing in that window used to be silently
+     * swallowed. The newest request is queued instead and replayed once the
+     * running transition exits, so rapid iteration always converges on the
+     * last pick.
+     */
+    property string queuedApply: ""
+
     function apply(path) {
-        if (applyProc.running)
+        if (applyProc.running) {
+            queuedApply = path;
             return;
+        }
         applyProc.command = ["bash", root.setScript, "set", path];
         applyProc.running = true;
     }
 
     function trash(path) {
-        Quickshell.execDetached(["gio", "trash", path]);
+        trashProc.command = ["gio", "trash", path];
+        trashProc.running = true;
         var kept = [];
         for (var i = 0; i < entries.length; i++)
             if (entries[i].path !== path)
                 kept.push(entries[i]);
         entries = kept;
+    }
+
+    Process {
+        id: trashProc
+        onExited: function(exitCode) {
+            if (exitCode !== 0)
+                root.refresh();
+        }
     }
 
     Process {
@@ -105,7 +125,16 @@ Singleton {
 
     Process {
         id: applyProc
-        onExited: stateProc.running = true
+        onExited: {
+            if (root.queuedApply.length) {
+                var next = root.queuedApply;
+                root.queuedApply = "";
+                applyProc.command = ["bash", root.setScript, "set", next];
+                applyProc.running = true;
+                return;
+            }
+            stateProc.running = true;
+        }
     }
 
     Component.onCompleted: refresh()

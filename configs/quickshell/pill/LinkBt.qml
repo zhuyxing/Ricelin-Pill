@@ -22,6 +22,23 @@ Item {
 
     readonly property var adapter: (typeof Bluetooth !== "undefined" && Bluetooth) ? Bluetooth.defaultAdapter : null
     readonly property var devices: (typeof Bluetooth !== "undefined" && Bluetooth && Bluetooth.devices) ? Bluetooth.devices.values : []
+
+    /**
+     * BlueZ hands the cache out in arbitrary order; sort connected first,
+     * then paired, then named strangers, with nameless MACs at the bottom so
+     * a discovery scan doesn't churn the useful rows around.
+     */
+    readonly property var devicesSorted: devices.slice().sort(function(a, b) {
+        function rank(d) {
+            if (!d) return 3;
+            if (d.connected) return 0;
+            if (d.paired) return 1;
+            return (d.name && d.name.length) ? 2 : 3;
+        }
+        var r = rank(a) - rank(b);
+        if (r !== 0) return r;
+        return String((a && a.name) || "").localeCompare(String((b && b.name) || ""));
+    })
     readonly property bool discovering: adapter ? adapter.discovering === true : false
 
     property string pairingAddress: ""
@@ -277,7 +294,7 @@ Item {
                 spacing: 2 * root.s
 
                 Repeater {
-                    model: root.devices
+                    model: root.devicesSorted
 
                     Column {
                         id: devItem
