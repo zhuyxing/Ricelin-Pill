@@ -244,12 +244,14 @@ ShellRoot {
                 anchors.fill: parent
                 enabled: overlay.modal
                 acceptedButtons: Qt.AllButtons
-                onPressed: {
+                onPressed: (mouse) => {
                     if (pill.quickChoosing) {
                         ScreenRec.quickChoosing = false;
                         ScreenRec.quickScreenChoosing = false;
                     } else if (overlay.surfaceOpen) {
-                        root.close();
+                        if (mouse.x < pillRegion.x || mouse.x > pillRegion.x + pillRegion.width
+                            || mouse.y < pillRegion.y || mouse.y > pillRegion.y + pillRegion.height)
+                            root.close();
                     } else {
                         pill.pinned = false;
                         root.peekMon = "";
