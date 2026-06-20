@@ -45,14 +45,23 @@ Arch or CachyOS with an AUR helper (yay or paru):
 curl -fsSL https://raw.githubusercontent.com/Gakuseei/Ricelin/main/install.sh | sh
 ```
 
-It pulls the deps, clones the rice into `~/.local/share/ricelin` and symlinks the
-configs into `~/.config`, backing up anything it would replace. The monitor layout
-and GPU env are swapped for portable defaults, so it boots on any hardware; my own
-layout is kept next to it as `monitors.lua.example`. Then start `Hyprland` from a TTY.
+Run it and it walks you through a short menu: tick the daily apps, the SDDM theme
+and the services you want, or just hit enter for QuickStart. It works straight
+through the pipe, reading your answers from the terminal.
+
+It then pulls the deps, clones the rice into `~/.local/share/ricelin` and symlinks
+the configs into `~/.config`, backing up anything it would replace. The monitor
+layout and GPU env are swapped for portable defaults, so it boots on any hardware;
+my own layout is kept next to it as `monitors.lua.example`. Then start `Hyprland`
+from a TTY.
+
+To skip the menu:
 
 ```
+--quickstart  core defaults, no questions
 --full        also install the daily apps (dolphin, keepassxc, zathura, imv, rnote)
 --sddm        also install the torii SDDM login theme
+--no-prompt   take defaults, for headless or CI
 --uninstall   remove the symlinks and restore the newest backup
 ```
 

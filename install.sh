@@ -22,8 +22,11 @@ RISHOT_INSTALL_URL="https://raw.githubusercontent.com/Gakuseei/rishot/main/insta
 
 WANT_FULL=0
 WANT_SDDM=0
+WANT_SERVICES=1
 WANT_UNINSTALL=0
 SKIP_DEPS=0
+NO_PROMPT=0
+SELECTION_GIVEN=0
 
 say() { printf '%s\n' "$*"; }
 step() { printf '\n:: %s\n' "$*"; }
@@ -49,9 +52,11 @@ Ricelin installer
 
   sh install.sh [options]
 
-Options:
+Run it with no options for the guided installer. Flags skip the menu:
   --full        also install the daily apps (dolphin, keepassxc, zathura, imv, rnote)
   --sddm        also install the torii SDDM login theme (system change, sudo)
+  --quickstart  core defaults, no questions asked
+  --no-prompt   never ask, take defaults (for headless or CI)
   --no-deps     skip the package step, only deploy the configs
   --uninstall   remove the Ricelin symlinks and restore the newest backup
   -h, --help    show this
@@ -61,8 +66,19 @@ EOF
 parse_args() {
 	for a in "$@"; do
 		case "$a" in
-		--full) WANT_FULL=1 ;;
-		--sddm) WANT_SDDM=1 ;;
+		--full)
+			WANT_FULL=1
+			SELECTION_GIVEN=1
+			;;
+		--sddm)
+			WANT_SDDM=1
+			SELECTION_GIVEN=1
+			;;
+		--quickstart) SELECTION_GIVEN=1 ;;
+		--no-prompt)
+			NO_PROMPT=1
+			SELECTION_GIVEN=1
+			;;
 		--no-deps) SKIP_DEPS=1 ;;
 		--uninstall) WANT_UNINSTALL=1 ;;
 		-h | --help)
@@ -72,6 +88,68 @@ parse_args() {
 		*) die "unknown option: $a (try --help)" ;;
 		esac
 	done
+}
+
+# Resolve a terminal we can talk to even under `curl | sh`, where stdin is the
+# script. /dev/tty is the controlling terminal; empty means headless.
+tty_dev() {
+	if { true </dev/tty; } 2>/dev/null && { true >/dev/tty; } 2>/dev/null; then
+		echo /dev/tty
+	elif [ -t 0 ]; then
+		echo /dev/stdin
+	else
+		echo ""
+	fi
+}
+
+# Ask a yes/no question on the terminal. $2 is the default when the user just
+# hits enter: Y or N.
+ask_yn() {
+	_q="$1"
+	_def="$2"
+	_t="$3"
+	printf '  %s ' "$_q" >"$_t"
+	read -r _ans <"$_t" || _ans=""
+	[ -z "$_ans" ] && _ans="$_def"
+	case "$_ans" in [Yy]*) return 0 ;; *) return 1 ;; esac
+}
+
+# Guided selection. whiptail gives a real tick-box grid when present; otherwise
+# we fall back to plain yes/no questions. Either way it reads the terminal, so it
+# works through a pipe. Sets WANT_FULL / WANT_SDDM / WANT_SERVICES.
+interactive_select() {
+	[ "$SELECTION_GIVEN" -eq 1 ] && return 0
+	[ "$NO_PROMPT" -eq 1 ] && return 0
+	t="$(tty_dev)"
+	[ -n "$t" ] || {
+		say "No terminal for prompts, taking QuickStart defaults"
+		return 0
+	}
+
+	if have whiptail; then
+		choices=$(whiptail --title "Ricelin installer" \
+			--checklist "Space to tick, Enter to install. Leave as-is for QuickStart." 13 66 3 \
+			full "Daily apps (dolphin, keepassxc, zathura, imv)" OFF \
+			sddm "torii SDDM login theme" OFF \
+			services "Enable NetworkManager + bluetooth" ON \
+			3>&1 1>&2 2>&3 <"$t") || {
+			say "Cancelled."
+			exit 0
+		}
+		WANT_FULL=0
+		WANT_SDDM=0
+		WANT_SERVICES=0
+		case "$choices" in *full*) WANT_FULL=1 ;; esac
+		case "$choices" in *sddm*) WANT_SDDM=1 ;; esac
+		case "$choices" in *services*) WANT_SERVICES=1 ;; esac
+		return 0
+	fi
+
+	say ""
+	say "Guided install (enter for the default in brackets):"
+	ask_yn "Install the daily apps too (dolphin, keepassxc, zathura, imv)? [y/N]" N "$t" && WANT_FULL=1
+	ask_yn "Install the torii SDDM login theme? [y/N]" N "$t" && WANT_SDDM=1
+	ask_yn "Enable NetworkManager + bluetooth services? [Y/n]" Y "$t" || WANT_SERVICES=0
 }
 
 detect_pm() {
@@ -349,10 +427,15 @@ main() {
 		exit 0
 	fi
 
-	say "Ricelin installer"
+	say ""
+	say "  Ricelin"
+	say "  Hyprland shell installer"
+	say ""
 
 	pm="$(detect_pm)"
 	say "Package manager: $pm"
+
+	interactive_select
 
 	if [ "$SKIP_DEPS" -eq 0 ]; then
 		install_deps "$pm" || warn "dependency step incomplete, continuing with the config deploy"
@@ -360,7 +443,7 @@ main() {
 	fi
 
 	deploy
-	[ "$SKIP_DEPS" -eq 0 ] && enable_services
+	[ "$SKIP_DEPS" -eq 0 ] && [ "$WANT_SERVICES" -eq 1 ] && enable_services
 	[ "$WANT_SDDM" -eq 1 ] && install_sddm
 
 	suggest_fish
