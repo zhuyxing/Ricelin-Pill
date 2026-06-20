@@ -291,8 +291,12 @@ install_deps() {
 	case "$pm" in
 	yay | paru)
 		step "Syncing and installing deps via $pm"
+		case "$pm" in
+		paru) review="--skipreview" ;;
+		*) review="--answerdiff None --answeredit None --answerclean None" ;;
+		esac
 		# shellcheck disable=SC2086
-		"$pm" -Syu --needed --noconfirm $pkgs || warn "some packages failed; check the log above"
+		"$pm" -Syu --needed --noconfirm $review $pkgs || warn "some packages failed; check the log above"
 		;;
 	pacman)
 		step "Syncing and installing deps via pacman"
@@ -318,8 +322,12 @@ install_rishot() {
 	fi
 	step "Installing rishot"
 	case "$pm" in
-	yay | paru)
-		"$pm" -S --needed --noconfirm rishot-git && return 0
+	paru)
+		"$pm" -S --needed --noconfirm --skipreview rishot-git && return 0
+		warn "AUR rishot-git failed, trying the upstream installer"
+		;;
+	yay)
+		"$pm" -S --needed --noconfirm --answerdiff None --answeredit None --answerclean None rishot-git && return 0
 		warn "AUR rishot-git failed, trying the upstream installer"
 		;;
 	esac
