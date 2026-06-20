@@ -32,13 +32,19 @@ Item {
     }
 
     readonly property real rowH: 26 * pick.s
+    readonly property real gap: 4 * pick.s
     readonly property real listH: pick.open ? Math.min(options.length * 24 * pick.s + 4 * pick.s, 150 * pick.s) : 0
 
     width: parent ? parent.width : 0
-    implicitHeight: pick.rowH + listAnim + (listAnim > 0.5 ? 4 * pick.s : 0)
+    implicitHeight: pick.rowH + pick.gapAnim + pick.listAnim
 
     property real listAnim: pick.listH
     Behavior on listAnim {
+        NumberAnimation { duration: Motion.morph; easing.type: Motion.easeMorph; easing.bezierCurve: Motion.morphCurve }
+    }
+
+    property real gapAnim: pick.open ? pick.gap : 0
+    Behavior on gapAnim {
         NumberAnimation { duration: Motion.morph; easing.type: Motion.easeMorph; easing.bezierCurve: Motion.morphCurve }
     }
 
@@ -99,12 +105,13 @@ Item {
 
     Rectangle {
         anchors.top: head.bottom
-        anchors.topMargin: 4 * pick.s
+        anchors.topMargin: pick.gapAnim
         anchors.left: parent.left
         anchors.leftMargin: 72 * pick.s
         anchors.right: parent.right
         height: pick.listAnim
-        visible: height > 0.5
+        visible: opacity > 0.01
+        opacity: Math.min(1, pick.listAnim / Math.min(pick.options.length * 24 * pick.s + 4 * pick.s, 150 * pick.s))
         clip: true
         radius: 9 * pick.s
         color: Theme.cardBot
