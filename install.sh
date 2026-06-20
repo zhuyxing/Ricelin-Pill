@@ -1,18 +1,4 @@
 #!/bin/sh
-# Ricelin installer.
-#
-# Pulls the runtime deps, clones the rice into ~/.local/share/ricelin, backs up
-# any config it would replace, then symlinks the Ricelin configs into ~/.config.
-# Hardware-specific bits (monitor layout, GPU env) are neutralised per machine so
-# the rice boots on any setup; the original layout is kept as monitors.lua.example.
-#
-# Ricelin is a Hyprland shell. On Niri, Sway or anything else only rishot, the
-# screenshot tool, runs; this script points you at rishot's own installer there.
-#
-# Safe to pipe: curl -fsSL .../install.sh | sh
-# The whole body lives in main(), called on the last line, so a truncated
-# download cannot execute a partial script.
-
 set -eu
 
 REPO_URL="https://github.com/Gakuseei/Ricelin.git"
@@ -34,7 +20,6 @@ warn() { printf 'ricelin: %s\n' "$*" >&2; }
 die() { printf 'ricelin: %s\n' "$*" >&2; exit 1; }
 have() { command -v "$1" >/dev/null 2>&1; }
 
-# Core deps: the shell, the compositor and everything a Ricelin surface drives.
 CORE_PKGS="hyprland-git quickshell ghostty fish \
 matugen awww cliphist wl-clipboard imagemagick jq \
 brightnessctl playerctl hyprpicker hyprpolkitagent hypridle dotool \
@@ -43,7 +28,6 @@ kde-cli-tools kdialog fastfetch \
 ttf-jetbrains-mono-nerd inter-font noto-fonts noto-fonts-cjk noto-fonts-emoji \
 papirus-icon-theme bibata-cursor-theme-bin"
 
-# The daily apps from the stack notes, only with --full.
 FULL_PKGS="dolphin keepassxc zathura zathura-pdf-mupdf imv rnote"
 
 usage() {
@@ -90,8 +74,6 @@ parse_args() {
 	done
 }
 
-# Resolve a terminal we can talk to even under `curl | sh`, where stdin is the
-# script. /dev/tty is the controlling terminal; empty means headless.
 tty_dev() {
 	if { true </dev/tty; } 2>/dev/null && { true >/dev/tty; } 2>/dev/null; then
 		echo /dev/tty
@@ -106,8 +88,6 @@ ESC=$(printf '\033')
 CR=$(printf '\r')
 NL=$(printf '\n')
 
-# A vermilion accent plus bold and dim, the rest plain. Honour NO_COLOR. The menu
-# writes to the terminal device, which is always a real tty, so colour is safe.
 if [ -z "${NO_COLOR:-}" ]; then
 	C_ACCENT=$(printf '\033[38;5;209m')
 	C_BOLD=$(printf '\033[1m')
@@ -123,14 +103,11 @@ fi
 MENU_TTY=''
 MENU_STTY=''
 
-# Put the terminal back into its normal line mode. Called on a clean menu exit
-# and from the interrupt trap so Ctrl+C never leaves a raw terminal behind.
 restore_tty() {
 	[ -n "$MENU_TTY" ] && [ -n "$MENU_STTY" ] && stty "$MENU_STTY" <"$MENU_TTY" 2>/dev/null
 	MENU_STTY=''
 }
 
-# Flip the option the cursor sits on.
 toggle_current() {
 	case "$MENU_CUR" in
 	0) WANT_FULL=$((1 - WANT_FULL)) ;;
@@ -139,8 +116,6 @@ toggle_current() {
 	esac
 }
 
-# Draw the three option rows: a coloured > cursor on the active row, [x]/[ ] tick
-# boxes. Colour escapes sit outside the padded name field so columns stay aligned.
 draw_rows() {
 	_t="$1"
 	_i=0
@@ -166,15 +141,11 @@ draw_rows() {
 	done
 }
 
-# Read a single keypress from the terminal, preserving the byte (the printf x
-# trick stops command substitution from eating a trailing CR/newline).
 read_key() {
 	_k=$(dd bs=1 count=1 2>/dev/null <"$1"; printf x)
 	printf '%s' "${_k%x}"
 }
 
-# Number-typed fallback when raw key mode is unavailable: print the list, read a
-# number to toggle, reprint, until enter (install) or q (cancel).
 number_menu() {
 	t="$1"
 	while :; do
@@ -198,10 +169,6 @@ number_menu() {
 	done
 }
 
-# Arrow-key checklist: up/down move the cursor, space ticks the row, enter goes
-# on to the confirm step, q cancels. Numbers 1-3 also toggle. Raw key mode via
-# stty; without it we fall back to typing numbers. Both read the terminal so they
-# work through a pipe. Sets WANT_FULL / WANT_SDDM / WANT_SERVICES.
 choose_extras() {
 	t="$1"
 	_old=$(stty -g <"$t" 2>/dev/null) || {
@@ -246,8 +213,6 @@ choose_extras() {
 	printf '\n' >"$t"
 }
 
-# Guided selection. Shows the checklist when a terminal is available, otherwise
-# takes the QuickStart defaults. Skipped entirely when a flag already chose.
 interactive_select() {
 	[ "$SELECTION_GIVEN" -eq 1 ] && return 0
 	[ "$NO_PROMPT" -eq 1 ] && return 0
@@ -259,8 +224,6 @@ interactive_select() {
 	choose_extras "$t"
 }
 
-# Last gate before anything is installed: list exactly what will happen and wait
-# for an explicit enter. q (or n) cancels with nothing changed.
 confirm_install() {
 	[ "$SELECTION_GIVEN" -eq 1 ] && return 0
 	[ "$NO_PROMPT" -eq 1 ] && return 0
@@ -289,10 +252,6 @@ detect_pm() {
 	fi
 }
 
-# A fresh Arch or CachyOS often ships no AUR helper, but Ricelin needs the AUR
-# (hyprland-git, rishot-git, bibata-cursor-theme-bin). Build yay-bin from the AUR
-# once so the rest is one command. makepkg refuses to run as root, so this needs a
-# normal user; the sudo prompts come from pacman and makepkg themselves.
 bootstrap_aur_helper() {
 	have yay && return 0
 	have paru && return 0
@@ -319,16 +278,11 @@ bootstrap_aur_helper() {
 	return 1
 }
 
-# Ricelin needs the AUR (hyprland-git, rishot-git, bibata-cursor-theme-bin), so a
-# bare pacman cannot pull everything. We say so plainly and install what we can.
 install_deps() {
 	pm="$1"
 	pkgs="$CORE_PKGS"
 	[ "$WANT_FULL" -eq 1 ] && pkgs="$pkgs $FULL_PKGS"
 
-	# Most people run this on a Hyprland they already have. Do not replace their
-	# compositor with hyprland-git; keep it and just note the lua-config needs a
-	# recent Hyprland. Only pull hyprland-git when nothing is installed.
 	if have Hyprland; then
 		pkgs=$(printf '%s' "$pkgs" | sed 's/hyprland-git//')
 		say "  Hyprland already installed, keeping it (the lua config needs a recent Hyprland)"
@@ -337,10 +291,6 @@ install_deps() {
 	case "$pm" in
 	yay | paru)
 		step "Syncing and installing deps via $pm"
-		# -Syu, not -S: a stale package database makes pacman fetch old file
-		# versions the mirrors have already dropped (404). Full upgrade is also
-		# the only supported way to install on Arch, no partial upgrades.
-		# word-splitting on $pkgs is intentional: one arg per package.
 		# shellcheck disable=SC2086
 		"$pm" -Syu --needed --noconfirm $pkgs || warn "some packages failed; check the log above"
 		;;
@@ -360,8 +310,6 @@ install_deps() {
 	esac
 }
 
-# rishot is its own project with its own installer. Prefer the AUR package, fall
-# back to its upstream script so the screenshot key works after the rice is in.
 install_rishot() {
 	pm="$1"
 	if have rishot; then
@@ -382,8 +330,6 @@ install_rishot() {
 	fi
 }
 
-# Move an existing path out of the way before we symlink over it. A path that is
-# already our own symlink is left alone so re-runs do not pile up backups.
 backup_path() {
 	target="$1"
 	[ -e "$target" ] || [ -L "$target" ] || return 0
@@ -410,9 +356,6 @@ link_into_config() {
 	say "  linked $(basename "$dest")"
 }
 
-# Replace the hardware-specific files in the clone with portable versions. The
-# clone is per-user under $PREFIX, so this never touches a hand-tuned setup; the
-# original monitor layout is preserved next to it as a reference.
 neutralize_clone() {
 	mon="$PREFIX/configs/hypr/modules/monitors.lua"
 	env="$PREFIX/configs/hypr/modules/env.lua"
@@ -490,9 +433,6 @@ deploy() {
 	mkdir -p "$HOME/.cache/ricelin"
 }
 
-# NetworkManager and bluetooth back the Link surface. Enabling NetworkManager on
-# a box already using iwd or systemd-networkd would break its network, so we only
-# touch it when nothing else is driving the link.
 enable_services() {
 	step "Enabling services"
 	if systemctl is-active --quiet systemd-networkd 2>/dev/null || systemctl is-active --quiet iwd 2>/dev/null; then
