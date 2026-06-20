@@ -37,6 +37,28 @@ wallust reads a palette from each wallpaper and recolors the terminal, window bo
 
 </div>
 
+## Install
+
+Arch or CachyOS with an AUR helper (yay or paru):
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/Gakuseei/Ricelin/main/install.sh | sh
+```
+
+It pulls the deps, clones the rice into `~/.local/share/ricelin` and symlinks the
+configs into `~/.config`, backing up anything it would replace. The monitor layout
+and GPU env are swapped for portable defaults, so it boots on any hardware; my own
+layout is kept next to it as `monitors.lua.example`. Then start `Hyprland` from a TTY.
+
+```
+--full        also install the daily apps (dolphin, keepassxc, zathura, imv, rnote)
+--sddm        also install the torii SDDM login theme
+--uninstall   remove the symlinks and restore the newest backup
+```
+
+Ricelin is a Hyprland shell. On Niri, Sway or anything else, only rishot (the
+screenshot tool) runs; the installer points you at [rishot](https://github.com/Gakuseei/rishot)'s own installer there.
+
 ## Keybinds
 
 | Key | Action |
@@ -53,7 +75,7 @@ wallust reads a palette from each wallpaper and recolors the terminal, window bo
 
 ## Notes
 
-These are my personal dotfiles, set up around my own machine. They are here to read and borrow from, not a one-command install. Paths and hardware bits will need adjusting.
+These started as my personal dotfiles, built around my own machine. The installer neutralises the hardware-specific bits, but some paths and choices still lean on how I run things, so read before you borrow.
 
 ## Credits
 
