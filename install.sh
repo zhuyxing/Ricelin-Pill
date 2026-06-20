@@ -102,21 +102,35 @@ tty_dev() {
 	fi
 }
 
-# Ask a yes/no question on the terminal. $2 is the default when the user just
-# hits enter: Y or N.
-ask_yn() {
-	_q="$1"
-	_def="$2"
-	_t="$3"
-	printf '  %s ' "$_q" >"$_t"
-	read -r _ans <"$_t" || _ans=""
-	[ -z "$_ans" ] && _ans="$_def"
-	case "$_ans" in [Yy]*) return 0 ;; *) return 1 ;; esac
+# Render a tick box for the toggle list: [x] when on, [ ] when off.
+box() { [ "$1" -eq 1 ] && printf '[x]' || printf '[ ]'; }
+
+# Inline terminal checklist: print the three options with tick boxes, read a
+# number to toggle one, reprint, repeat until the user hits enter. Plain stdio,
+# no full-screen TUI and no extra dependency; reads the terminal so it works
+# through a pipe. Sets WANT_FULL / WANT_SDDM / WANT_SERVICES.
+choose_extras() {
+	t="$1"
+	while :; do
+		printf '\n  Ricelin extras  (type a number to toggle, Enter to install):\n' >"$t"
+		printf '    %s 1) full      daily apps (dolphin, keepassxc, zathura, imv)\n' "$(box "$WANT_FULL")" >"$t"
+		printf '    %s 2) sddm      torii SDDM login theme\n' "$(box "$WANT_SDDM")" >"$t"
+		printf '    %s 3) services  enable NetworkManager + bluetooth\n' "$(box "$WANT_SERVICES")" >"$t"
+		printf '  > ' >"$t"
+		read -r _ans <"$t" || _ans=""
+		case "$_ans" in
+		1) WANT_FULL=$((1 - WANT_FULL)) ;;
+		2) WANT_SDDM=$((1 - WANT_SDDM)) ;;
+		3) WANT_SERVICES=$((1 - WANT_SERVICES)) ;;
+		"") break ;;
+		*) ;;
+		esac
+	done
 }
 
-# Guided selection. whiptail gives a real tick-box grid when present; otherwise
-# we fall back to plain yes/no questions. Either way it reads the terminal, so it
-# works through a pipe. Sets WANT_FULL / WANT_SDDM / WANT_SERVICES.
+# Guided selection. Shows the inline checklist when a terminal is available,
+# otherwise takes the QuickStart defaults. Skipped entirely when a flag already
+# made the choice.
 interactive_select() {
 	[ "$SELECTION_GIVEN" -eq 1 ] && return 0
 	[ "$NO_PROMPT" -eq 1 ] && return 0
@@ -125,31 +139,7 @@ interactive_select() {
 		say "No terminal for prompts, taking QuickStart defaults"
 		return 0
 	}
-
-	if have whiptail; then
-		choices=$(whiptail --title "Ricelin installer" \
-			--checklist "Space to tick, Enter to install. Leave as-is for QuickStart." 13 66 3 \
-			full "Daily apps (dolphin, keepassxc, zathura, imv)" OFF \
-			sddm "torii SDDM login theme" OFF \
-			services "Enable NetworkManager + bluetooth" ON \
-			3>&1 1>&2 2>&3 <"$t") || {
-			say "Cancelled."
-			exit 0
-		}
-		WANT_FULL=0
-		WANT_SDDM=0
-		WANT_SERVICES=0
-		case "$choices" in *full*) WANT_FULL=1 ;; esac
-		case "$choices" in *sddm*) WANT_SDDM=1 ;; esac
-		case "$choices" in *services*) WANT_SERVICES=1 ;; esac
-		return 0
-	fi
-
-	say ""
-	say "Guided install (enter for the default in brackets):"
-	ask_yn "Install the daily apps too (dolphin, keepassxc, zathura, imv)? [y/N]" N "$t" && WANT_FULL=1
-	ask_yn "Install the torii SDDM login theme? [y/N]" N "$t" && WANT_SDDM=1
-	ask_yn "Enable NetworkManager + bluetooth services? [Y/n]" Y "$t" || WANT_SERVICES=0
+	choose_extras "$t"
 }
 
 detect_pm() {
