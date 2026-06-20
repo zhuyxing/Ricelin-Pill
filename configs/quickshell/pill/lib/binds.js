@@ -382,6 +382,31 @@ function editCmd(luaText, lineIndex, cmd) {
 }
 
 /**
+ * Replaces the dispatch (second top-level argument) of the bind on `lineIndex`
+ * with `action` verbatim, leaving the combo (arg 0) and opts (arg 2) intact. Use
+ * for non-exec or env-prefixed dispatches the simple command field cannot express
+ * (window.*, focus, os.getenv path); the caller passes the full lua source.
+ * Returns { text, ok, error }.
+ */
+function editAction(luaText, lineIndex, action) {
+    var lines = luaText.split("\n");
+    if (lineIndex < 0 || lineIndex >= lines.length)
+        return { text: luaText, ok: false, error: "invalid lineIndex" };
+
+    var raw = lines[lineIndex];
+    var range = argRange(raw, 1);
+    if (!range)
+        return { text: luaText, ok: false, error: "could not isolate dispatch arg" };
+
+    var slice = raw.slice(range.start, range.end);
+    var leading = slice.match(/^\s*/)[0];
+    var trailing = slice.match(/\s*$/)[0];
+
+    lines[lineIndex] = raw.slice(0, range.start) + leading + action + trailing + raw.slice(range.end);
+    return { text: lines.join("\n"), ok: true, error: "" };
+}
+
+/**
  * Replaces the trailing `-- ...` name comment on the bind at `lineIndex`. Any
  * existing comment after the closing paren is stripped first, then ` -- name`
  * is appended when `name` is non-empty. Returns { text, ok }.
@@ -418,6 +443,7 @@ var Binds = {
     add: add,
     del: del,
     editCmd: editCmd,
+    editAction: editAction,
     editName: editName
 };
 

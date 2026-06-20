@@ -58,6 +58,7 @@ PillSurface {
     property string origCombo: ""
     property string origName: ""
     property string origCmd: ""
+    property string origAction: ""
 
     /**
      * Binds whose combo, label, name or inner command contains the current query
@@ -127,6 +128,7 @@ PillSurface {
         root.origCombo = b.combo;
         root.origName = b.name;
         root.origCmd = b.cmd;
+        root.origAction = b.action;
         root.formOpen = true;
     }
 
@@ -143,6 +145,7 @@ PillSurface {
         root.origCombo = "";
         root.origName = "";
         root.origCmd = "";
+        root.origAction = "";
         root.formOpen = true;
     }
 
@@ -207,6 +210,12 @@ PillSurface {
             var c = Binds.editCmd(out, root.formLine, root.formCmd);
             if (!c.ok) { root.conflict = c.error || "command edit failed"; return; }
             out = c.text;
+        }
+        if (!root.formCmdEditable && root.formAction !== root.origAction) {
+            if (root.formAction.trim().length === 0) { root.conflict = "action empty"; return; }
+            var a2 = Binds.editAction(out, root.formLine, root.formAction.trim());
+            if (!a2.ok) { root.conflict = a2.error || "action edit failed"; return; }
+            out = a2.text;
         }
         if (root.formName !== root.origName) {
             var n = Binds.editName(out, root.formLine, root.formName);
@@ -759,9 +768,9 @@ PillSurface {
                     anchors.bottom: parent.bottom
                     height: 26 * root.s
                     radius: 8 * root.s
-                    color: root.formCmdEditable ? Theme.tileBg : Qt.alpha(Theme.tileBg, 0.5)
+                    color: Theme.tileBg
                     border.width: 1
-                    border.color: (root.formCmdEditable && cmdField.activeFocus) ? Qt.alpha(Theme.vermLit, 0.45) : Theme.border
+                    border.color: (cmdField.activeFocus || actionField.activeFocus) ? Qt.alpha(Theme.vermLit, 0.45) : Theme.border
 
                     TextField {
                         id: cmdField
@@ -788,18 +797,29 @@ PillSurface {
                         }
                     }
 
-                    Text {
+                    TextField {
+                        id: actionField
                         visible: !root.formCmdEditable
                         anchors.left: parent.left
                         anchors.leftMargin: 11 * root.s
                         anchors.right: parent.right
                         anchors.rightMargin: 11 * root.s
                         anchors.verticalCenter: parent.verticalCenter
-                        text: root.formAction
-                        color: Theme.dim
+                        background: null
+                        padding: 0
+                        color: Theme.cream
                         font.family: Theme.font
                         font.pixelSize: 10.5 * root.s
-                        elide: Text.ElideRight
+                        placeholderText: "lua dispatch"
+                        placeholderTextColor: Theme.faint
+                        selectByMouse: true
+                        selectionColor: Theme.verm
+                        text: root.formAction
+                        onTextEdited: root.formAction = text
+                        Keys.onPressed: (e) => {
+                            if (e.key === Qt.Key_Escape) { root.closeForm(); e.accepted = true; }
+                            else if (e.key === Qt.Key_Return || e.key === Qt.Key_Enter) { root.save(); e.accepted = true; }
+                        }
                     }
                 }
             }
