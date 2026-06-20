@@ -238,10 +238,10 @@ SettingsSurface {
                     readonly property bool pending: root.pendingOut === card.modelData.name
 
                     width: parent.width
-                    radius: 11 * root.s
-                    color: Theme.tileBg
+                    radius: Motion.rTile * root.s
+                    color: Theme.cardTop
                     border.width: 1
-                    border.color: card.pending ? Qt.alpha(Theme.vermLit, 0.5) : Theme.border
+                    border.color: card.pending ? Qt.alpha(Theme.vermLit, 0.55) : Theme.hairSoft
                     implicitHeight: cardCol.implicitHeight + 22 * root.s
                     Behavior on border.color { ColorAnimation { duration: Motion.fast } }
 
@@ -355,10 +355,11 @@ SettingsSurface {
                                 visible: !card.pending && root.pendingOut.length === 0
                                 width: applyLabel.implicitWidth + 28 * root.s
                                 height: 28 * root.s
-                                radius: 8 * root.s
-                                color: applyArea.containsMouse ? Theme.frameBg : Theme.frameBg
+                                radius: 9 * root.s
+                                color: applyArea.containsMouse ? Theme.frameBg : Theme.tileBg
                                 border.width: 1
                                 border.color: Qt.alpha(Theme.vermLit, applyArea.containsMouse ? 0.55 : 0.34)
+                                Behavior on color { ColorAnimation { duration: Motion.fast } }
                                 Behavior on border.color { ColorAnimation { duration: Motion.fast } }
 
                                 Text {
@@ -393,8 +394,9 @@ SettingsSurface {
                                     anchors.verticalCenter: parent.verticalCenter
                                     width: keepLabel.implicitWidth + 28 * root.s
                                     height: 28 * root.s
-                                    radius: 8 * root.s
+                                    radius: 9 * root.s
                                     color: keepArea.containsMouse ? Theme.vermLit : Theme.verm
+                                    Behavior on color { ColorAnimation { duration: Motion.fast } }
 
                                     Text {
                                         id: keepLabel

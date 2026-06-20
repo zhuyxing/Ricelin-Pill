@@ -4,11 +4,14 @@ import QtQuick
 import "Singletons"
 
 /**
- * Labelled dropdown for the display surface: a left caption, a value chip showing
- * the current option, and a clipped scrollable list that expands below when open.
- * Picking emits picked(value) and the parent closes it; tapping the chip emits
- * requestToggle so the surface can keep only one dropdown open at a time. Sized to
- * the card width so a long mode list never overflows the pill.
+ * Labelled dropdown for the display surface: a left caption, a value chip styled
+ * like the segmented control's pill, and an inset panel that grows below when open.
+ * The panel's height animates with the surface morph so the expand never paints a
+ * bare intermediate, and stays clipped to its animating bounds. Picking emits
+ * picked(value) and the parent closes it; tapping the chip emits requestToggle so
+ * the surface keeps only one dropdown open at a time. Resolution labels carry a "×"
+ * the picker renders as a smaller, dimmer separator in the shell font, so the digits
+ * never shift to a fallback face.
  */
 Item {
     id: pick
@@ -32,7 +35,12 @@ Item {
     readonly property real listH: pick.open ? Math.min(options.length * 24 * pick.s + 4 * pick.s, 150 * pick.s) : 0
 
     width: parent ? parent.width : 0
-    implicitHeight: rowH + (pick.open ? listH + 4 * pick.s : 0)
+    implicitHeight: pick.rowH + listAnim + (listAnim > 0.5 ? 4 * pick.s : 0)
+
+    property real listAnim: pick.listH
+    Behavior on listAnim {
+        NumberAnimation { duration: Motion.morph; easing.type: Motion.easeMorph; easing.bezierCurve: Motion.morphCurve }
+    }
 
     Row {
         id: head
@@ -55,21 +63,19 @@ Item {
             anchors.verticalCenter: parent.verticalCenter
             width: parent.width - 72 * pick.s
             height: 24 * pick.s
-            radius: 8 * pick.s
+            radius: 9 * pick.s
             color: Theme.tileBg
             border.width: 1
-            border.color: pick.open ? Qt.alpha(Theme.vermLit, 0.5) : Theme.border
-            Behavior on border.color { ColorAnimation { duration: Motion.fast } }
+            border.color: pick.open ? Qt.alpha(Theme.vermLit, 0.55) : Theme.border
 
-            Text {
+            DisplayLabel {
                 anchors.left: parent.left
                 anchors.leftMargin: 10 * pick.s
                 anchors.verticalCenter: parent.verticalCenter
+                s: pick.s
                 text: pick.currentLabel
                 color: Theme.cream
-                font.family: Theme.font
-                font.pixelSize: 10.5 * pick.s
-                font.weight: Font.DemiBold
+                weight: Font.DemiBold
             }
 
             GlyphIcon {
@@ -97,13 +103,13 @@ Item {
         anchors.left: parent.left
         anchors.leftMargin: 72 * pick.s
         anchors.right: parent.right
-        height: pick.listH
-        visible: pick.open
+        height: pick.listAnim
+        visible: height > 0.5
         clip: true
-        radius: 8 * pick.s
+        radius: 9 * pick.s
         color: Theme.cardBot
         border.width: 1
-        border.color: Theme.border
+        border.color: Theme.hairSoft
 
         ListView {
             anchors.fill: parent
@@ -119,21 +125,20 @@ Item {
 
                 width: ListView.view.width
                 height: 24 * pick.s
-                radius: 6 * pick.s
+                radius: 7 * pick.s
                 color: optHover.hovered ? Theme.frameBg
                     : (optRow.current ? Qt.alpha(Theme.vermLit, 0.14) : "transparent")
 
                 HoverHandler { id: optHover }
 
-                Text {
+                DisplayLabel {
                     anchors.left: parent.left
                     anchors.leftMargin: 9 * pick.s
                     anchors.verticalCenter: parent.verticalCenter
+                    s: pick.s
                     text: optRow.modelData.label
                     color: optRow.current ? Theme.vermLit : Theme.subtle
-                    font.family: Theme.font
-                    font.pixelSize: 10.5 * pick.s
-                    font.weight: optRow.current ? Font.Bold : Font.Medium
+                    weight: optRow.current ? Font.Bold : Font.Medium
                 }
 
                 MouseArea {
