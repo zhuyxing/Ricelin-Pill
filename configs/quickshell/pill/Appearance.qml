@@ -254,7 +254,7 @@ SettingsSurface {
         Item {
             id: toneSection
             width: parent.width
-            height: Flags.paletteMode === "manual" ? toneRow.implicitHeight : 0
+            height: Flags.paletteMode === "manual" ? toneRow.height : 0
             clip: true
             Behavior on height { NumberAnimation { duration: Motion.standard; easing.type: Motion.easeStandard } }
 
