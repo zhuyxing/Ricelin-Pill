@@ -160,7 +160,7 @@ ShellRoot {
         PanelWindow {
             id: reserve
             required property var modelData
-            readonly property real s: modelData ? modelData.height / 1080 : 1
+            readonly property real s: modelData ? (modelData.height / 1080) * Flags.uiScale : 1
             readonly property real topGap: 8 * s
             readonly property real restHeight: 38 * s
 
@@ -184,7 +184,7 @@ ShellRoot {
         PanelWindow {
             id: overlay
             required property var modelData
-            readonly property real s: modelData ? modelData.height / 1080 : 1
+            readonly property real s: modelData ? (modelData.height / 1080) * Flags.uiScale : 1
             readonly property real topGap: 8 * s
             readonly property string surface: root.openMon === modelData.name ? root.openSurface : ""
             readonly property bool surfaceOpen: surface.length > 0

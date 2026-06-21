@@ -88,7 +88,11 @@ awww img "$pic" \
 mkdir -p "$(dirname "$STATE")"
 printf '%s\n' "$pic" > "$STATE"
 
-python3 "$(dirname "$0")/wallcolors.py" "$pic" >/dev/null 2>&1 || true
+flags_file="${XDG_STATE_HOME:-$HOME/.local/state}/ricelin/flags.json"
+pmode=$(jq -r '.paletteMode // "static"' "$flags_file" 2>/dev/null || echo static)
+if [ "$pmode" != "manual" ]; then
+    python3 "$(dirname "$0")/wallcolors.py" "$pic" >/dev/null 2>&1 || true
+fi
 hyprctl reload >/dev/null 2>&1 || true
 busctl --user call com.mitchellh.ghostty /com/mitchellh/ghostty org.gtk.Actions \
     Activate "sava{sv}" reload-config 0 0 >/dev/null 2>&1 || true

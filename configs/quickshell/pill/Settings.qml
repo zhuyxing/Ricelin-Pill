@@ -18,6 +18,7 @@ SettingsSurface {
     rows: [
         { item: appearanceRow, kind: "nav", surface: "appearance" },
         { item: displayRow, kind: "nav", surface: "display" },
+        { item: inputRow, kind: "nav", surface: "input" },
         { item: keybindsRow, kind: "nav", surface: "keybinds" },
         { item: recordingRow, kind: "nav", surface: "recording" },
         { item: updatesRow, kind: "nav", surface: "updates" }
@@ -77,6 +78,22 @@ SettingsSurface {
                 height: 16 * root.s
                 name: "chevron-right"
                 color: root.focusRowItem === displayRow ? Theme.cream : Theme.iconDim
+                stroke: 2.2
+            }
+        }
+
+        SettingsRow {
+            id: inputRow
+            surface: root
+            glyph: "操"
+            name: "Input"
+            sub: "Pointer, keyboard, cursor"
+
+            GlyphIcon {
+                width: 16 * root.s
+                height: 16 * root.s
+                name: "chevron-right"
+                color: root.focusRowItem === inputRow ? Theme.cream : Theme.iconDim
                 stroke: 2.2
             }
         }

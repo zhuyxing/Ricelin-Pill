@@ -17,7 +17,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-CACHE = Path(sys.argv[2]) if len(sys.argv) > 2 else Path.home() / ".cache" / "ricelin"
+CACHE = Path.home() / ".cache" / "ricelin"
 
 SURF_NAMES = ["surface", "surface_container_low", "surface_container",
               "surface_container_high", "surface_container_highest", "outline_variant"]
@@ -81,14 +81,20 @@ def lerp(x, x0, x1, y0, y1):
 def main():
     if len(sys.argv) < 2:
         return 1
-    wallpaper = sys.argv[1]
-    if not Path(wallpaper).is_file():
-        return 0
-
-    hue, sat, mean_l = analyze(wallpaper)
-    chromatic = hue is not None
-    if not chromatic:
-        hue, sat = 0.09, 0.0
+    if sys.argv[1] == "--hue":
+        hue = (float(sys.argv[2]) % 360) / 360.0
+        mode = sys.argv[3] if len(sys.argv) > 3 else "dark"
+        sat = 0.5
+        mean_l = 0.85 if mode == "light" else 0.12
+        chromatic = True
+    else:
+        wallpaper = sys.argv[1]
+        if not Path(wallpaper).is_file():
+            return 0
+        hue, sat, mean_l = analyze(wallpaper)
+        chromatic = hue is not None
+        if not chromatic:
+            hue, sat = 0.09, 0.0
     CACHE.mkdir(parents=True, exist_ok=True)
 
     light = mean_l >= 0.40

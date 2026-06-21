@@ -12,7 +12,7 @@ import Quickshell
  * theme and only the colours that should breathe with the wallpaper do.
  */
 Singleton {
-    readonly property bool dyn: Flags.dynamicPalette
+    readonly property bool dyn: Flags.paletteMode !== "static"
 
     /**
      * Bright warm pop shared by the flame glow, charging glyphs, the recording

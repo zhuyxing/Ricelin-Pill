@@ -48,6 +48,7 @@ Item {
     readonly property bool recordingOpen: surface === "recording"
     readonly property bool updatesOpen: surface === "updates"
     readonly property bool displayOpen: surface === "display"
+    readonly property bool inputOpen: surface === "input"
     readonly property bool fontpickerOpen: surface === "fontpicker"
     readonly property bool settingsLike: settingsOpen || appearanceOpen || recordingOpen || updatesOpen
     readonly property bool hasMedia: Mpris.players.values.length > 0
@@ -110,6 +111,7 @@ Item {
     readonly property real recordingW: 360 * s
     readonly property real updatesW: 360 * s
     readonly property real displayW: 392 * s
+    readonly property real inputW: 392 * s
     readonly property real fontpickerW: 360 * s
     readonly property real toastW: 342 * s
     readonly property real quickChooseW: 344 * s
@@ -146,6 +148,7 @@ Item {
         recording:  { size: () => Qt.size(recordingW, recording.implicitHeight + 29 * s), ame: recording },
         updates:    { size: () => Qt.size(updatesW, updates.implicitHeight + 29 * s), ame: updates },
         display:    { size: () => Qt.size(displayW, display.implicitHeight + 29 * s), ame: display },
+        input:      { size: () => Qt.size(inputW, input.implicitHeight + 29 * s), ame: input },
         fontpicker: { size: () => Qt.size(fontpickerW, fontpicker.implicitHeight + 29 * s), ame: fontpicker }
     })
 
@@ -307,7 +310,7 @@ Item {
             pill.requestSurface("appearance");
             return;
         }
-        if (pill.appearanceOpen || pill.recordingOpen || pill.updatesOpen || pill.displayOpen) {
+        if (pill.appearanceOpen || pill.recordingOpen || pill.updatesOpen || pill.displayOpen || pill.inputOpen) {
             pill.requestSurface("settings");
             return;
         }
@@ -1301,6 +1304,15 @@ Item {
         id: display
         s: pill.s
         open: pill.displayOpen
+        morphCloseness: pill.morphCloseness
+        onRequestClose: pill.requestClose()
+        onRequestSurface: (name) => pill.requestSurface(name)
+    }
+
+    Input {
+        id: input
+        s: pill.s
+        open: pill.inputOpen
         morphCloseness: pill.morphCloseness
         onRequestClose: pill.requestClose()
         onRequestSurface: (name) => pill.requestSurface(name)

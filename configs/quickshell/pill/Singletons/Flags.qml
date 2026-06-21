@@ -18,7 +18,11 @@ Singleton {
     property alias time12h: adapter.time12h
     property alias clockSeconds: adapter.clockSeconds
     property alias showGlyphs: adapter.showGlyphs
-    property alias dynamicPalette: adapter.dynamicPalette
+    property alias paletteMode: adapter.paletteMode
+    property alias uiScale: adapter.uiScale
+    property alias reduceMotion: adapter.reduceMotion
+    property alias manualHue: adapter.manualHue
+    property alias manualDark: adapter.manualDark
     property alias uiFont: adapter.uiFont
     property alias recordCountdown: adapter.recordCountdown
     property alias recordDir: adapter.recordDir
@@ -50,7 +54,11 @@ Singleton {
             property bool time12h: false
             property bool clockSeconds: false
             property bool showGlyphs: true
-            property bool dynamicPalette: false
+            property string paletteMode: "static"
+            property real uiScale: 1.0
+            property bool reduceMotion: false
+            property int manualHue: 30
+            property bool manualDark: true
             property string uiFont: ""
             property int recordCountdown: 5
             property string recordDir: ""
