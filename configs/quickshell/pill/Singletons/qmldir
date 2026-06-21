@@ -9,3 +9,4 @@ singleton Battery Battery.qml
 singleton ScreenRec ScreenRec.qml
 singleton Sysmon Sysmon.qml
 singleton Dyn Dyn.qml
+singleton Weather Weather.qml

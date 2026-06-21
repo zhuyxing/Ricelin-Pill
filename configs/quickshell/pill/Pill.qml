@@ -814,6 +814,32 @@ Item {
                 }
             }
 
+            Row {
+                id: weatherGlance
+                anchors.verticalCenter: parent.verticalCenter
+                visible: Weather.ready
+                spacing: 5 * pill.s
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: Weather.glyphFor(Weather.codeNow, Weather.isDay)
+                    color: Theme.cream
+                    font.family: Theme.fontJp
+                    font.weight: Font.Medium
+                    font.pixelSize: 15 * pill.s
+                }
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: Weather.tempNow + "°"
+                    color: Theme.subtle
+                    font.family: Theme.font
+                    font.pixelSize: 13 * pill.s
+                    font.weight: Font.Medium
+                    font.features: { "tnum": 1 }
+                }
+            }
+
             Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 width: 1
