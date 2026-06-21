@@ -45,7 +45,7 @@ PillSurface {
     readonly property real rowGap: 2 * s
 
     readonly property real gridW: 282 * s
-    readonly property real weatherW: 124 * s
+    readonly property real weatherW: 152 * s
     readonly property real editorW: 196 * s
     readonly property real gutter: 16 * s
 
@@ -136,18 +136,20 @@ PillSurface {
         Behavior on opacity { NumberAnimation { duration: Motion.standard; easing.type: Motion.easeStandard } }
 
         Column {
+            id: wxCol
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
-            spacing: 3 * root.s
+            anchors.rightMargin: 6 * root.s
+            spacing: 9 * root.s
 
             Row {
-                spacing: 4 * root.s
+                spacing: 9 * root.s
 
                 GlyphIcon {
                     anchors.verticalCenter: parent.verticalCenter
-                    width: 24 * root.s
-                    height: 24 * root.s
+                    width: 32 * root.s
+                    height: 32 * root.s
                     name: Weather.glyphFor(Weather.codeNow, Weather.isDay)
                     color: Theme.todayWarm
                     stroke: 1.9
@@ -159,7 +161,7 @@ PillSurface {
                         text: Weather.tempNow + "°"
                         color: Theme.cream
                         font.family: Theme.font
-                        font.pixelSize: 22 * root.s
+                        font.pixelSize: 26 * root.s
                         font.weight: Font.DemiBold
                         font.features: { "tnum": 1 }
                     }
@@ -167,63 +169,119 @@ PillSurface {
                         text: Weather.labelFor(Weather.codeNow)
                         color: Theme.subtle
                         font.family: Theme.font
-                        font.pixelSize: 9.5 * root.s
+                        font.pixelSize: 10 * root.s
                         font.weight: Font.Medium
                     }
                 }
             }
 
-            Text {
+            Row {
                 width: parent.width
-                text: Weather.city
-                color: Theme.dim
-                font.family: Theme.font
-                font.pixelSize: 9 * root.s
-                font.weight: Font.Medium
-                font.capitalization: Font.AllUppercase
-                font.letterSpacing: 0.8 * root.s
-                elide: Text.ElideRight
-                visible: Weather.city.length > 0
+                spacing: 8 * root.s
+
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    text: Weather.city
+                    color: Theme.dim
+                    font.family: Theme.font
+                    font.pixelSize: 9 * root.s
+                    font.weight: Font.Medium
+                    font.capitalization: Font.AllUppercase
+                    font.letterSpacing: 0.8 * root.s
+                    elide: Text.ElideRight
+                    visible: Weather.city.length > 0
+                }
+                Row {
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 3 * root.s
+
+                    GlyphIcon {
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 11 * root.s
+                        height: 11 * root.s
+                        name: "droplet"
+                        color: Theme.faint
+                        stroke: 1.6
+                    }
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: Weather.humidity + "%"
+                        color: Theme.faint
+                        font.family: Theme.font
+                        font.pixelSize: 9.5 * root.s
+                        font.weight: Font.Medium
+                        font.features: { "tnum": 1 }
+                    }
+                }
             }
 
-            Item { width: 1; height: 5 * root.s }
+            Rectangle {
+                width: wxCol.width
+                height: 1
+                color: Theme.hairSoft
+            }
 
-            Repeater {
-                model: Weather.hourly.slice(0, 6)
+            Row {
+                width: wxCol.width
 
-                Row {
-                    id: hourRow
-                    required property var modelData
-                    width: parent.width
-                    height: 17 * root.s
-                    spacing: 6 * root.s
+                Repeater {
+                    model: Weather.daily.slice(0, 4)
 
-                    Text {
-                        width: 22 * root.s
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: hourRow.modelData.hour
-                        color: Theme.dim
-                        font.family: Theme.font
-                        font.pixelSize: 10 * root.s
-                        font.weight: Font.Medium
-                        font.features: { "tnum": 1 }
-                    }
-                    GlyphIcon {
-                        width: 16 * root.s
-                        height: 16 * root.s
-                        anchors.verticalCenter: parent.verticalCenter
-                        name: Weather.glyphFor(hourRow.modelData.code, true)
-                        color: Theme.subtle
-                        stroke: 1.7
-                    }
-                    Text {
-                        anchors.verticalCenter: parent.verticalCenter
-                        text: hourRow.modelData.temp + "°"
-                        color: Theme.cream
-                        font.family: Theme.font
-                        font.pixelSize: 11 * root.s
-                        font.weight: Font.Medium
-                        font.features: { "tnum": 1 }
+                    Column {
+                        id: dayCol
+                        required property var modelData
+                        width: wxCol.width / 4
+                        spacing: 5 * root.s
+
+                        Text {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: dayCol.modelData.day
+                            color: Theme.faint
+                            font.family: Theme.font
+                            font.pixelSize: 9 * root.s
+                            font.weight: Font.DemiBold
+                            font.capitalization: Font.AllUppercase
+                            font.letterSpacing: 0.5 * root.s
+                        }
+                        GlyphIcon {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            width: 15 * root.s
+                            height: 15 * root.s
+                            name: Weather.glyphFor(dayCol.modelData.code, true)
+                            color: Theme.subtle
+                            stroke: 1.7
+                        }
+                        Text {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            text: dayCol.modelData.temp + "°"
+                            color: Theme.cream
+                            font.family: Theme.font
+                            font.pixelSize: 11 * root.s
+                            font.weight: Font.Medium
+                            font.features: { "tnum": 1 }
+                        }
+                        Row {
+                            anchors.horizontalCenter: parent.horizontalCenter
+                            spacing: 2 * root.s
+
+                            GlyphIcon {
+                                anchors.verticalCenter: parent.verticalCenter
+                                width: 9 * root.s
+                                height: 9 * root.s
+                                name: "droplet"
+                                color: Theme.faint
+                                stroke: 1.6
+                            }
+                            Text {
+                                anchors.verticalCenter: parent.verticalCenter
+                                text: dayCol.modelData.rh + "%"
+                                color: Theme.faint
+                                font.family: Theme.font
+                                font.pixelSize: 8.5 * root.s
+                                font.weight: Font.Medium
+                                font.features: { "tnum": 1 }
+                            }
+                        }
                     }
                 }
             }

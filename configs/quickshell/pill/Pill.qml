@@ -814,32 +814,6 @@ Item {
                 }
             }
 
-            Row {
-                id: weatherGlance
-                anchors.verticalCenter: parent.verticalCenter
-                visible: Weather.ready
-                spacing: 5 * pill.s
-
-                GlyphIcon {
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: 16 * pill.s
-                    height: 16 * pill.s
-                    name: Weather.glyphFor(Weather.codeNow, Weather.isDay)
-                    color: Theme.cream
-                    stroke: 1.9
-                }
-
-                Text {
-                    anchors.verticalCenter: parent.verticalCenter
-                    text: Weather.tempNow + "°"
-                    color: Theme.subtle
-                    font.family: Theme.font
-                    font.pixelSize: 13 * pill.s
-                    font.weight: Font.Medium
-                    font.features: { "tnum": 1 }
-                }
-            }
-
             Rectangle {
                 anchors.verticalCenter: parent.verticalCenter
                 width: 1
@@ -851,6 +825,32 @@ Item {
                 id: statusRow
                 anchors.verticalCenter: parent.verticalCenter
                 spacing: 12 * pill.s
+
+                Row {
+                    id: weatherGlance
+                    anchors.verticalCenter: parent.verticalCenter
+                    visible: Weather.ready
+                    spacing: 5 * pill.s
+
+                    GlyphIcon {
+                        anchors.verticalCenter: parent.verticalCenter
+                        width: 16 * pill.s
+                        height: 16 * pill.s
+                        name: Weather.glyphFor(Weather.codeNow, Weather.isDay)
+                        color: Theme.subtle
+                        stroke: 1.8
+                    }
+
+                    Text {
+                        anchors.verticalCenter: parent.verticalCenter
+                        text: Weather.tempNow + "°"
+                        color: Theme.subtle
+                        font.family: Theme.font
+                        font.pixelSize: 12.5 * pill.s
+                        font.weight: Font.Medium
+                        font.features: { "tnum": 1 }
+                    }
+                }
 
                 MinimizedTray {
                     id: minimized

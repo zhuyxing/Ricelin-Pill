@@ -28,9 +28,11 @@ Singleton {
 
     property int tempNow: 0
     property int codeNow: 0
+    property int humidity: 0
     property bool isDay: true
     property string city: ""
     property var hourly: []
+    property var daily: []
     property bool ready: false
 
     property real lat: 0
@@ -174,8 +176,9 @@ Singleton {
         command: ["curl", "-s", "--max-time", "10",
             "https://api.open-meteo.com/v1/forecast?latitude=" + root.lat
             + "&longitude=" + root.lon
-            + "&current=temperature_2m,weather_code,is_day"
-            + "&hourly=temperature_2m,weather_code&forecast_hours=24&timezone=auto"]
+            + "&current=temperature_2m,weather_code,is_day,relative_humidity_2m"
+            + "&hourly=temperature_2m,weather_code&forecast_hours=24"
+            + "&daily=weather_code,temperature_2m_max,relative_humidity_2m_mean&forecast_days=5&timezone=auto"]
         stdout: StdioCollector {
             onStreamFinished: {
                 try {
@@ -195,10 +198,26 @@ Singleton {
                             });
                         }
                     }
+                    var days = [];
+                    var dd = d.daily;
+                    if (dd && dd.time && dd.weather_code && dd.temperature_2m_max && dd.relative_humidity_2m_mean) {
+                        var dn = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+                        var m = Math.min(dd.time.length, dd.weather_code.length, dd.temperature_2m_max.length, dd.relative_humidity_2m_mean.length);
+                        for (var j = 0; j < m; j++) {
+                            days.push({
+                                day: dn[new Date(dd.time[j]).getDay()],
+                                code: dd.weather_code[j],
+                                temp: Math.round(dd.temperature_2m_max[j]),
+                                rh: Math.round(dd.relative_humidity_2m_mean[j])
+                            });
+                        }
+                    }
                     root.tempNow = Math.round(cur.temperature_2m);
                     root.codeNow = cur.weather_code;
+                    root.humidity = Math.round(cur.relative_humidity_2m);
                     root.isDay = cur.is_day === 1;
                     root.hourly = rows;
+                    root.daily = days;
                     root.ready = true;
                 } catch (e) {}
             }
