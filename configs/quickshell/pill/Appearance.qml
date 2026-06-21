@@ -221,6 +221,8 @@ SettingsSurface {
                             anchors.fill: parent
                             cursorShape: Qt.PointingHandCursor
                             function setHue(mx) {
+                                if (Flags.manualSat < 0.05)
+                                    Flags.manualSat = 0.5;
                                 Flags.manualHue = Math.round(Math.max(0, Math.min(1, mx / hueStrip.width)) * 359);
                             }
                             onPressed: (mouse) => setHue(mouse.x)
