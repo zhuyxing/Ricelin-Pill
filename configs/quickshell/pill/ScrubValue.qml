@@ -127,6 +127,7 @@ Item {
                 spacing: 1 * root.s
 
                 Text {
+                    id: numText
                     anchors.verticalCenter: parent.verticalCenter
                     text: root.value.toFixed(root.decimals)
                     color: Theme.cream
@@ -135,8 +136,7 @@ Item {
                     font.weight: Font.DemiBold
                 }
                 Text {
-                    anchors.bottom: parent.bottom
-                    anchors.bottomMargin: 1 * root.s
+                    anchors.verticalCenter: numText.verticalCenter
                     visible: root.unit.length > 0
                     text: root.unit
                     color: Theme.faint
