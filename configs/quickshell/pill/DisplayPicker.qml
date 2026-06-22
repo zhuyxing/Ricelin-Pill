@@ -101,7 +101,29 @@ Item {
         }
     }
 
+    /**
+     * Shadow caster kept separate from the panel. A layer that holds the option
+     * text would rasterise the glyphs to an offscreen texture and soften them, so
+     * the shadow lives on this textless backing rect and the panel above stays
+     * unlayered with crisp digits. Its own face hides behind the opaque panel, only
+     * the shadow halo bleeds out.
+     */
     Rectangle {
+        anchors.fill: panel
+        visible: pick.open
+        radius: panel.radius
+        color: Theme.cardBot
+        layer.enabled: true
+        layer.effect: MultiEffect {
+            shadowEnabled: true
+            shadowColor: Theme.shadow
+            shadowBlur: 0.6
+            shadowVerticalOffset: 4 * pick.s
+        }
+    }
+
+    Rectangle {
+        id: panel
         anchors.top: head.bottom
         anchors.topMargin: pick.open ? pick.gap : 0
         anchors.left: parent.left
@@ -117,13 +139,6 @@ Item {
         }
         border.width: 1
         border.color: Theme.frameBorder
-        layer.enabled: true
-        layer.effect: MultiEffect {
-            shadowEnabled: true
-            shadowColor: Theme.shadow
-            shadowBlur: 0.6
-            shadowVerticalOffset: 4 * pick.s
-        }
 
         ListView {
             anchors.fill: parent
