@@ -25,13 +25,13 @@ The pill becomes media and now playing, a calendar, the wallpaper picker, clipbo
 - Terminal: Ghostty
 - Shell: fish
 - Font: JetBrains Mono Nerd
-- Colors: wallust, palette pulled from the wallpaper
+- Colors: matugen, palette pulled from the wallpaper
 
-wallust reads a palette from each wallpaper and recolors the terminal, window borders and fastfetch. The shell itself runs a warm vermilion theme I tuned by hand.
+matugen pulls a palette from each wallpaper and recolors the pill, terminal, window borders and fastfetch. The shell itself runs a warm vermilion theme I tuned by hand.
 
 <div align="center">
 
-![wallust pulls the palette from the wallpaper](assets/wallust.gif)
+![the palette is pulled from the wallpaper](assets/wallust.gif)
 
 ![Wallpaper retheme](assets/retheme.gif)
 

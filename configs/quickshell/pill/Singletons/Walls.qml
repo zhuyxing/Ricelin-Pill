@@ -42,7 +42,7 @@ Singleton {
     }
 
     /**
-     * wallpaper.sh blocks through the whole transition (awww wave, wallust,
+     * wallpaper.sh blocks through the whole transition (awww wave, matugen,
      * reload), easily 1-2s; a pick landing in that window used to be silently
      * swallowed. Now the newest request is queued and replayed once the
      * running transition exits, so rapid iteration converges on the last pick.

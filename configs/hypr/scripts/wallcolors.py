@@ -78,6 +78,37 @@ def lerp(x, x0, x1, y0, y1):
     return y0 + t * (y1 - y0)
 
 
+def render_fastfetch(pill):
+    """
+    Recolour the fastfetch readout from the same pill palette. fastfetch has no
+    daemon, so writing the rendered config is enough, the next run picks it up.
+    The accent drives the keys and the torii, the surface ramp the lantern body,
+    and a dim text tone the section rules, so it tracks the wallpaper like the
+    pill and terminal do.
+    """
+    ff = Path.home() / ".config" / "fastfetch"
+    tmpl = ff / "config.jsonc.in"
+    if not tmpl.is_file():
+        return
+    seq = lambda h: "%d;%d;%d" % tuple(int(h[i:i + 2], 16) for i in (1, 3, 5))
+    repl = {
+        "__LANTERN__": str(ff / "lantern.txt"),
+        "__KEYS__": seq(pill["primary"]),
+        "__SEP__": seq(pill["dim"]),
+        "__LOGO1__": seq(pill["primary"]),
+        "__LOGO2__": seq(pill["on_primary_container"]),
+        "__LOGO3__": seq(pill["surface_container"]),
+        "__LOGO4__": seq(pill["surface_container_high"]),
+        "__LOGO5__": seq(pill["subtle"]),
+        "__LOGO6__": seq(pill["outline"]),
+        "__LOGO7__": seq(pill["bright"]),
+    }
+    out = tmpl.read_text()
+    for key, val in repl.items():
+        out = out.replace(key, val)
+    (ff / "config.jsonc").write_text(out)
+
+
 def main():
     if len(sys.argv) < 2:
         return 1
@@ -116,6 +147,7 @@ def main():
     for key, (lit, st) in zip(TEXT_KEYS, text):
         pill[key] = tint(hue, st, lit)
     (CACHE / "colors.json").write_text(json.dumps(pill, indent=2) + "\n")
+    render_fastfetch(pill)
 
     try:
         b = {k: v["dark"]["color"] for k, v in
