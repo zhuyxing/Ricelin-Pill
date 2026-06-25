@@ -39,6 +39,7 @@ Singleton {
     property alias idleScreenOffMin: adapter.idleScreenOffMin
     property alias idleSuspendMin: adapter.idleSuspendMin
     property alias weatherCity: adapter.weatherCity
+    property alias musicViz: adapter.musicViz
 
     FileView {
         id: file
@@ -82,6 +83,7 @@ Singleton {
             property int idleScreenOffMin: 6
             property int idleSuspendMin: 0
             property string weatherCity: ""
+            property bool musicViz: true
         }
     }
 }

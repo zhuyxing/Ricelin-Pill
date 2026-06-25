@@ -699,35 +699,52 @@ Item {
                 width: kanjiFill.implicitWidth
                 height: kanjiFill.implicitHeight
 
+                /** Audio leaving the speakers flips the clock glyph over to the live waveform. */
+                readonly property bool barsOn: Flags.musicViz && Cava.active
+
                 Text {
                     anchors.fill: parent
-                    visible: Flags.showGlyphs
+                    opacity: (Flags.showGlyphs && !restKanji.barsOn) ? 1 : 0
                     text: kanjiFill.text
                     color: "transparent"
                     font: kanjiFill.font
                     style: Text.Outline
                     styleColor: Qt.alpha(Theme.vermLit,
                         Math.min(1, (pill.mode === "rest" || !pill.hoverSoulGate ? 0.5 : 0) + pill.kanjiFlash))
+                    Behavior on opacity { NumberAnimation { duration: Motion.standard; easing.type: Motion.easeStandard } }
                 }
 
                 Text {
                     id: kanjiFill
-                    visible: Flags.showGlyphs
+                    opacity: (Flags.showGlyphs && !restKanji.barsOn) ? 1 : 0
                     text: "時"
                     color: Theme.cream
                     font.family: Theme.fontJp
                     font.weight: Font.Medium
                     font.pixelSize: 15 * pill.s
+                    Behavior on opacity { NumberAnimation { duration: Motion.standard; easing.type: Motion.easeStandard } }
                 }
 
                 GlyphIcon {
                     anchors.centerIn: parent
-                    visible: !Flags.showGlyphs
+                    opacity: (!Flags.showGlyphs && !restKanji.barsOn) ? 1 : 0
                     width: 17 * pill.s
                     height: 17 * pill.s
                     name: "clock"
                     color: Theme.cream
                     stroke: 1.7
+                    Behavior on opacity { NumberAnimation { duration: Motion.standard; easing.type: Motion.easeStandard } }
+                }
+
+                MusicBars {
+                    id: musicBars
+                    anchors.horizontalCenter: parent.horizontalCenter
+                    anchors.bottom: kanjiFill.baseline
+                    s: pill.s
+                    opacity: restKanji.barsOn ? 1 : 0
+                    scale: restKanji.barsOn ? 1 : 0.7
+                    Behavior on opacity { NumberAnimation { duration: Motion.standard; easing.type: Motion.easeStandard } }
+                    Behavior on scale { NumberAnimation { duration: Motion.standard; easing.type: Motion.easeStandard } }
                 }
             }
             Text {
