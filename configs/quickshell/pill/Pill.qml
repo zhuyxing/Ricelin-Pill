@@ -6,6 +6,7 @@ import QtQuick.Shapes
 import Quickshell
 import Quickshell.Services.Mpris
 import Quickshell.Networking
+import Quickshell.Hyprland
 import "Singletons"
 
 /**
@@ -79,6 +80,26 @@ Item {
      * backdrop swallowing the reach for it and dismissing the whole pill.
      */
     readonly property bool authPending: updatesOpen && updates.applying
+
+    /**
+     * The special workspace shown on this pill's monitor, surfaced as a plain word
+     * in place of the clock so it is obvious you are looking at the minimized stash
+     * or the private space rather than your real desktop. Empty in the normal case.
+     */
+    readonly property string specialView: {
+        var ms = Hyprland.monitors.values;
+        for (var i = 0; i < ms.length; i++) {
+            if (ms[i] && ms[i].name === pill.screenName) {
+                var o = ms[i].lastIpcObject;
+                var sw = (o && o.specialWorkspace) ? o.specialWorkspace.name : "";
+                if (sw === "special:minimized") return "Minimized";
+                if (sw === "special:private") return "Private";
+                if (sw === "special:stash") return "Stash";
+                return "";
+            }
+        }
+        return "";
+    }
     readonly property bool toastActive: Notifs.popups.length > 0
     readonly property bool osdActive: osd.flashing
 
@@ -703,6 +724,7 @@ Item {
             spacing: 9 * pill.s
             Item {
                 id: restKanji
+                visible: pill.specialView === ""
                 anchors.verticalCenter: parent.verticalCenter
                 width: kanjiFill.implicitWidth
                 height: kanjiFill.implicitHeight
@@ -756,6 +778,7 @@ Item {
                 }
             }
             Text {
+                visible: pill.specialView === ""
                 anchors.verticalCenter: parent.verticalCenter
                 text: clock.hhmm
                 color: Theme.cream
@@ -763,6 +786,15 @@ Item {
                 font.pixelSize: 16 * pill.s
                 font.weight: Font.DemiBold
                 font.features: { "tnum": 1 }
+            }
+            Text {
+                visible: pill.specialView !== ""
+                anchors.verticalCenter: parent.verticalCenter
+                text: pill.specialView
+                color: Theme.cream
+                font.family: Theme.font
+                font.pixelSize: 16 * pill.s
+                font.weight: Font.DemiBold
             }
         }
     }

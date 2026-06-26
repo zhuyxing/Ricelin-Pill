@@ -187,6 +187,24 @@ ShellRoot {
         }
         function peek(mon: string): void { root.peek(mon); }
         function hide(): void { root.close(); }
+
+        /**
+         * The two halves of the SUPER+M minimize toggle, driven by the
+         * minimize-toggle script which has already read the focused window. A
+         * desktop window drops into the minimized stash; a window already stashed
+         * comes back to the workspace it is handed, so the same key hides and
+         * restores. Both target the window by address so they act on the one the
+         * user pressed on, not whatever the compositor calls active afterwards.
+         */
+        function minimizeWindow(addr: string): void {
+            Hyprland.dispatch('hl.dsp.window.move({ workspace = "special:minimized", follow = false, window = "address:' + addr + '" })');
+        }
+        function restoreWindow(arg: string): void {
+            var p = arg.split("|");
+            if (p.length < 2 || p[0].length === 0)
+                return;
+            Hyprland.dispatch('hl.dsp.window.move({ workspace = ' + p[1] + ', window = "address:' + p[0] + '" })');
+        }
     }
 
     Variants {
