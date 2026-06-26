@@ -71,6 +71,14 @@ Item {
     readonly property bool surfaceOpen: surface.length > 0
     property bool hoverLatch: false
     readonly property bool expanded: surfaceOpen || held || hoverLatch
+
+    /**
+     * True while the open surface is waiting on an external auth dialog (the
+     * updater's pkexec password prompt). The shell drops its modal grab for this
+     * so the polkit window underneath is clickable and typeable, instead of the
+     * backdrop swallowing the reach for it and dismissing the whole pill.
+     */
+    readonly property bool authPending: updatesOpen && updates.applying
     readonly property bool toastActive: Notifs.popups.length > 0
     readonly property bool osdActive: osd.flashing
 
