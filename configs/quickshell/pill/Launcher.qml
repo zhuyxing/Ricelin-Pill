@@ -167,7 +167,7 @@ PillSurface {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.bottom: parent.bottom
-        spacing: 2 * root.s
+        spacing: 5 * root.s
         clip: true
         boundsBehavior: Flickable.StopAtBounds
         model: root.results.length
@@ -226,9 +226,9 @@ PillSurface {
                 Rectangle {
                     id: iconBg
                     anchors.verticalCenter: parent.verticalCenter
-                    width: 26 * root.s
-                    height: 26 * root.s
-                    radius: 6 * root.s
+                    width: 22 * root.s
+                    height: 22 * root.s
+                    radius: 5 * root.s
                     color: Qt.rgba(1, 1, 1, 0.05)
                     visible: !(icon.status === Image.Ready && icon.source != "")
                 }
