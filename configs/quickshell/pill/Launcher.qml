@@ -16,8 +16,8 @@ PillSurface {
     id: root
 
     mTop: 15
-    mLeft: 17
-    mRight: 17
+    mLeft: 11
+    mRight: 11
     mBottom: 14
 
     property string query: ""
@@ -176,7 +176,7 @@ PillSurface {
             id: appRow
             required property int index
             width: list.width
-            height: 34 * root.s
+            height: 38 * root.s
 
             readonly property var entry: root.results[index]
             readonly property bool selected: index === root.selectedIndex
@@ -226,9 +226,9 @@ PillSurface {
                 Rectangle {
                     id: iconBg
                     anchors.verticalCenter: parent.verticalCenter
-                    width: 20 * root.s
-                    height: 20 * root.s
-                    radius: 5 * root.s
+                    width: 26 * root.s
+                    height: 26 * root.s
+                    radius: 6 * root.s
                     color: Qt.rgba(1, 1, 1, 0.05)
                     visible: !(icon.status === Image.Ready && icon.source != "")
                 }
@@ -244,19 +244,6 @@ PillSurface {
                     source: appRow.entry && appRow.entry.icon ? Quickshell.iconPath(appRow.entry.icon, true) : ""
                 }
 
-                Text {
-                    id: nameText
-                    anchors.verticalCenter: parent.verticalCenter
-                    anchors.left: icon.right
-                    anchors.leftMargin: 10 * root.s
-                    text: appRow.entry ? appRow.entry.name : ""
-                    color: Theme.cream
-                    font.family: Theme.font
-                    font.pixelSize: 13 * root.s
-                    font.weight: appRow.selected ? Font.DemiBold : Font.Normal
-                    elide: Text.ElideRight
-                    width: Math.min(implicitWidth, parent.width - icon.width - 10 * root.s - sec.width - ret.width - 12 * root.s)
-                }
                 TextMetrics {
                     id: retMetrics
                     font.family: Theme.font
@@ -275,15 +262,41 @@ PillSurface {
                     width: visible ? retMetrics.advanceWidth + 6 * root.s : 0
                     horizontalAlignment: Text.AlignRight
                 }
-                Text {
-                    id: sec
-                    anchors.verticalCenter: parent.verticalCenter
+
+                /**
+                 * Name over description, each clipped on its own line, so a long
+                 * comment can no longer bleed into the name the way one shared row
+                 * let it. The block centres on the icon whether it shows one line or
+                 * two, and an app with no description just reads as a centred name.
+                 */
+                Column {
+                    anchors.left: iconBg.right
+                    anchors.leftMargin: 10 * root.s
                     anchors.right: ret.left
-                    text: appRow.secondary
-                    color: appRow.selected ? Theme.dim : Theme.faint
-                    font.family: Theme.font
-                    font.pixelSize: 10.5 * root.s
-                    horizontalAlignment: Text.AlignRight
+                    anchors.rightMargin: 8 * root.s
+                    anchors.verticalCenter: parent.verticalCenter
+                    spacing: 1 * root.s
+
+                    Text {
+                        id: nameText
+                        width: parent.width
+                        text: appRow.entry ? appRow.entry.name : ""
+                        color: Theme.cream
+                        font.family: Theme.font
+                        font.pixelSize: 13 * root.s
+                        font.weight: appRow.selected ? Font.DemiBold : Font.Normal
+                        elide: Text.ElideRight
+                    }
+                    Text {
+                        id: sec
+                        width: parent.width
+                        visible: appRow.secondary.length > 0
+                        text: appRow.secondary
+                        color: appRow.selected ? Theme.dim : Theme.faint
+                        font.family: Theme.font
+                        font.pixelSize: 10.5 * root.s
+                        elide: Text.ElideRight
+                    }
                 }
             }
         }
