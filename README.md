@@ -40,36 +40,39 @@ matugen pulls a palette from each wallpaper and recolors the pill, terminal, win
 ## Install
 
 > [!WARNING]
-> The installer is still work in progress. It hasn't been tested on a clean machine other than mine yet, so expect rough edges. If you run it, read `install.sh` first and have backups. Bug reports are welcome, just say it's the installer.
+> The installer is young. It hasn't had a clean-machine run beyond mine yet, so expect rough edges. Read `install.sh` first and keep backups. If something breaks, file a bug and say it's the installer.
 
-Arch or CachyOS. If you have no AUR helper it builds yay for you:
+One line, straight through the pipe:
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/Gakuseei/Ricelin/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/Gakuseei/Ricelin/main/install.sh | bash
 ```
 
-Run it and it walks you through a short menu: tick the daily apps, the SDDM theme
-and the services you want, or just hit enter for QuickStart. It works straight
-through the pipe, reading your answers from the terminal.
+`install.sh` is a thin bootstrap: it detects your distro (Arch, Debian, Fedora or
+openSUSE), makes sure git and python3 are there, clones the rice into
+`~/.local/share/ricelin`, then hands off to the guided Python installer. That part
+walks you through a short wizard, picks the right package names for your distro,
+pulls the deps and copies the configs into `~/.config`, backing up anything it
+replaces. The monitor layout and GPU env are swapped for portable defaults so it
+boots on any hardware; my own layout is kept next to it as `monitors.lua.example`.
+Then start `Hyprland` from a TTY.
 
-It then pulls the deps, clones the rice into `~/.local/share/ricelin` and symlinks
-the configs into `~/.config`, backing up anything it would replace. The monitor
-layout and GPU env are swapped for portable defaults, so it boots on any hardware;
-my own layout is kept next to it as `monitors.lua.example`. Then start `Hyprland`
-from a TTY.
+Skip the wizard with flags, passed straight through the pipe:
 
-To skip the menu:
+```sh
+curl -fsSL https://raw.githubusercontent.com/Gakuseei/Ricelin/main/install.sh | bash -s -- --quickstart
+```
 
 ```
 --quickstart  core defaults, no questions
 --full        also install the daily apps (dolphin, keepassxc, zathura, imv, rnote)
 --sddm        also install the torii SDDM login theme
---no-prompt   take defaults, for headless or CI
---uninstall   remove the symlinks and restore the newest backup
+--no-deps     skip the package step, just deploy the configs
+--dry-run     walk the whole flow and change nothing
 ```
 
-Ricelin is a Hyprland shell. On Niri, Sway or anything else, only rishot (the
-screenshot tool) runs; the installer points you at [rishot](https://github.com/Gakuseei/rishot)'s own installer there.
+Ricelin is a Hyprland shell. On Niri, Sway or anything else only rishot (the
+screenshot tool) makes sense; grab it from [rishot](https://github.com/Gakuseei/rishot)'s own installer.
 
 ## Keybinds
 

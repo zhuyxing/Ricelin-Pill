@@ -9,12 +9,16 @@ Item {
     property var auth: null
     property string screenName: ""
 
+    /**
+     * The lock UI's primary screen is just the first one Quickshell reports, so
+     * the auth panel lands on one deterministic monitor without pinning a display
+     * name that only exists on Erik's machine.
+     */
     readonly property bool isMain: {
         var scr = Quickshell.screens;
-        for (var i = 0; i < scr.length; i++)
-            if (scr[i] && scr[i].name === "DP-1")
-                return surface.screenName === "DP-1";
-        return true;
+        if (scr.length === 0)
+            return true;
+        return surface.screenName === scr[0].name;
     }
 
     readonly property real spread: 2.4
